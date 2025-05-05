@@ -38,8 +38,7 @@ services:
     depends_on:
       - db
     environment:
-      - ASPNETCORE_ENVIRONMENT=Development
-      - ConnectionStrings__DefaultConnection=Host=db;Port=5432;Database=mydatabase;Username=user;Password=password
+      - ASPNETCORE_ENVIRONMENT=LocalDocker
       
   dataconsumer:
     profiles: ["full"]
@@ -54,7 +53,7 @@ services:
     environment:
       - MQTT__Host=mqtt
       - MQTT__Port=1883
-      - ConnectionStrings__DefaultConnection=Host=db;Port=5432;Database=mydatabase;Username=user;Password=password
+      - DOTNET_ENVIRONMENT=LocalDocker
 
 volumes:
   postgres_data:
