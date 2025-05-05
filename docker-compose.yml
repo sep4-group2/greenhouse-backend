@@ -1,0 +1,60 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:16
+    container_name: local_postgres
+    restart: always
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: mydatabase
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  mqtt:
+    image: eclipse-mosquitto:2.0
+    container_name: local_mqtt
+    restart: always
+    ports:
+      - "1883:1883"   # MQTT
+      - "9001:9001"   # WebSocket (optional)
+    volumes:
+      - ./mosquitto/config:/mosquitto/config
+      - ./mosquitto/data:/mosquitto/data
+      - ./mosquitto/log:/mosquitto/log
+      
+  api:
+    profiles: ["full"]
+    build:
+      context: .
+      dockerfile: Api/Dockerfile
+    container_name: api_service
+    restart: always
+    ports:
+      - "5050:8080"
+    depends_on:
+      - db
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DefaultConnection=Host=db;Port=5432;Database=mydatabase;Username=user;Password=password
+      
+  dataconsumer:
+    profiles: ["full"]
+    build:
+      context: .
+      dockerfile: DataConsumer/Dockerfile
+    container_name: dataconsumer_service
+    restart: always
+    depends_on:
+      - db
+      - mqtt
+    environment:
+      - MQTT__Host=mqtt
+      - MQTT__Port=1883
+      - ConnectionStrings__DefaultConnection=Host=db;Port=5432;Database=mydatabase;Username=user;Password=password
+
+volumes:
+  postgres_data:
