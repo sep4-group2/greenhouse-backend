@@ -4,3 +4,11 @@ obj/
 /packages/
 riderModule.iml
 /_ReSharper.Caches/
+
+
+# Mosquitto directories
+/mosquitto/data/*
+/mosquitto/log/*
+/mosquitto/config/*
+# Except the configuration file
+!/mosquitto/config/mosquitto.conf
