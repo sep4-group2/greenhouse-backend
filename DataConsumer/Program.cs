@@ -7,6 +7,14 @@ using Data.Database;
 
 // Set up configuration
 var environment = Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT") ?? "Production";
+var topics = new[]
+{
+    "air humidity",
+    "soil humidity",
+    "CO2 levels",
+    "temperature",
+    "brightness"
+};
 
 IConfiguration configuration = new ConfigurationBuilder()
     .SetBasePath(Directory.GetCurrentDirectory())
@@ -32,8 +40,8 @@ try
     Console.WriteLine("Testing database connection...");
     var optionsBuilder = new DbContextOptionsBuilder<AppDbContext>();
     optionsBuilder.UseNpgsql(connectionString);
-    
-    using (var dbContext = new AppDbContext(optionsBuilder.Options))
+    var dbContext = new AppDbContext(optionsBuilder.Options);
+    using (dbContext)
     {
         // This will verify if we can connect to the database
         bool canConnect = dbContext.Database.CanConnect();
@@ -53,8 +61,9 @@ try
     }
     
     // Create and use the simple MQTT client
-    var mqttClient = new SimpleMqttClient(configuration);
+    var mqttClient = new SimpleMqttClient(configuration, dbContext);
     await mqttClient.ConnectAndKeepAlive();
+    await mqttClient.SubscribeToTopics(topics);
 
     // Keep the application running without using Console.ReadKey()
     Console.WriteLine("Client connected and running. The application will continue running until terminated.");
