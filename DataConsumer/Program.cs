@@ -9,11 +9,8 @@ using Data.Database;
 var environment = Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT") ?? "Production";
 var topics = new[]
 {
-    "air humidity",
-    "soil humidity",
-    "CO2 levels",
-    "temperature",
-    "brightness"
+    "greenhouse/sensor",
+    "greenhouse/action"
 };
 
 IConfiguration configuration = new ConfigurationBuilder()

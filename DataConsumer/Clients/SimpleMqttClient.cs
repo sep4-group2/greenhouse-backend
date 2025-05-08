@@ -29,7 +29,7 @@ public class SimpleMqttClient
 
             Console.WriteLine($"Received message on topic '{topic}': {message}");
             
-            await SaveToDatabase(topic, message);
+            await HandleMessage(topic, message);
         };
 
             
@@ -90,28 +90,31 @@ public class SimpleMqttClient
         }
     }
     
-    private async Task SaveToDatabase(string topic, string message)
+    private async Task HandleMessage(string topic, string message)
     {
-        try
+        if (topic == "greenhouse/sensor")
         {
-            var sensorData = JsonSerializer.Deserialize<SensorReading>(message);
-            var data = new SensorReading()
+            try
             {
-                Type = sensorData.Type,
-                Value = sensorData.Value,
-                Unit = sensorData.Unit,
-                Timestamp = sensorData.Timestamp,
-                GreenhouseId = sensorData.GreenhouseId,
-                Greenhouse = sensorData.Greenhouse
-            };
-            //edit the data based on what is actually coming through
+                var sensorData = JsonSerializer.Deserialize<SensorReading>(message);
+                var data = new SensorReading()
+                {
+                    Type = sensorData.Type,
+                    Value = sensorData.Value,
+                    Unit = sensorData.Unit,
+                    Timestamp = sensorData.Timestamp,
+                    GreenhouseId = sensorData.GreenhouseId,
+                    Greenhouse = sensorData.Greenhouse
+                };
+                    //edit the data based on what is actually coming through
             
-            _dbContext.SensorReadings.Add(data);
-            await _dbContext.SaveChangesAsync();
-        }
-        catch (JsonException e)
-        {
-            Console.WriteLine($"Failed to parse message: {e.Message}");
-        }
+                _dbContext.SensorReadings.Add(data);
+                await _dbContext.SaveChangesAsync();
+            }
+            catch (JsonException e)
+            {
+                Console.WriteLine($"Failed to parse message: {e.Message}");
+            }}
+        //insert notification action and save to database if message is action
     }
 }
