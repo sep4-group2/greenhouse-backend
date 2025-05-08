@@ -6,6 +6,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Data", "Data\Data.csproj", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataConsumer", "DataConsumer\DataConsumer.csproj", "{88206EA6-7029-48CE-939F-886A0B4F9788}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tests", "Tests\Tests.csproj", "{3447DE2E-88FA-425D-87B8-B468C4923EE4}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -24,5 +26,9 @@ Global
 		{88206EA6-7029-48CE-939F-886A0B4F9788}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{88206EA6-7029-48CE-939F-886A0B4F9788}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{88206EA6-7029-48CE-939F-886A0B4F9788}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3447DE2E-88FA-425D-87B8-B468C4923EE4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3447DE2E-88FA-425D-87B8-B468C4923EE4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3447DE2E-88FA-425D-87B8-B468C4923EE4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3447DE2E-88FA-425D-87B8-B468C4923EE4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

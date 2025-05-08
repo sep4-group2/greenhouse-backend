@@ -1,6 +1,8 @@
 using System.Text;
 using System.Text.Json;
 using Data.Database;
+using Data.Database.Entities;
+using DataConsumer.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using MQTTnet;
@@ -12,12 +14,14 @@ public class SimpleMqttClient
     private readonly IMqttClient _client;
     private readonly MqttClientOptions _options;
     private readonly AppDbContext _dbContext;
+    private readonly SensorReadingValidator _validator;
 
     public SimpleMqttClient(IConfiguration configuration, AppDbContext dbContext)
     {
         var host = configuration["MQTT:Host"] ?? "localhost";
         var port = int.Parse(configuration["MQTT:Port"] ?? "1883");
         _dbContext = dbContext;
+        _validator = new SensorReadingValidator(dbContext);
             
         var factory = new MqttClientFactory();
         _client = factory.CreateMqttClient();
@@ -110,6 +114,7 @@ public class SimpleMqttClient
             
                 _dbContext.SensorReadings.Add(data);
                 await _dbContext.SaveChangesAsync();
+                await _validator.ValidateAndTriggerAsync(data);
             }
             catch (JsonException e)
             {
