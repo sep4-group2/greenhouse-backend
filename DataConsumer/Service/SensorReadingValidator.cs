@@ -32,7 +32,7 @@ public class SensorReadingValidator
 
         Console.WriteLine($"Out-of-range reading detected: {reading.Type} = {reading.Value}");
 
-        //dummy notification
+        
         //TODO should be passed to notification server
         var notification = new Notification
         {
@@ -41,8 +41,8 @@ public class SensorReadingValidator
             GreenhouseId = reading.GreenhouseId
         };
 
-        //_dbContext.Notifications.Add(notification);
-        //await _dbContext.SaveChangesAsync();
+        _dbContext.Notifications.Add(notification);
+        await _dbContext.SaveChangesAsync();
     }
 
     private static bool OutOfRange(SensorReading reading, string type, Preset preset)

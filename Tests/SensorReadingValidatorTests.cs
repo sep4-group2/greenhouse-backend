@@ -38,9 +38,9 @@ namespace Tests
                 Id = 1,
                 Name = "Test Greenhouse",
                 IpAddress = "192.168.1.10",
-                LightingMethod = "LED",
-                WateringMethod = "Drip",
-                FertilizationMethod = "Automatic",
+                LightingMethod = "bulb",
+                WateringMethod = "auto",
+                FertilizationMethod = "auto",
                 UserEmail = "test@test.com",
                 ActivePreset = preset
             };
@@ -61,6 +61,11 @@ namespace Tests
             // Act
             await validator.ValidateAndTriggerAsync(reading);
             
+            // Assert
+            var notifications = await dbContext.Notifications.ToListAsync();
+            Assert.Single(notifications);
+            Assert.Contains("temperature reading of 30 is out of range.", notifications[0].Content);
+            Assert.Equal(1, notifications[0].GreenhouseId);
         }
     }
 }
