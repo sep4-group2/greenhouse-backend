@@ -1,4 +1,8 @@
+using System.Text;
+using System.Text.Json;
+using Data.Database;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using MQTTnet;
 
 namespace DataConsumer.Clients;
@@ -7,14 +11,27 @@ public class SimpleMqttClient
 {
     private readonly IMqttClient _client;
     private readonly MqttClientOptions _options;
+    private readonly AppDbContext _dbContext;
 
-    public SimpleMqttClient(IConfiguration configuration)
+    public SimpleMqttClient(IConfiguration configuration, AppDbContext dbContext)
     {
         var host = configuration["MQTT:Host"] ?? "localhost";
         var port = int.Parse(configuration["MQTT:Port"] ?? "1883");
+        _dbContext = dbContext;
             
         var factory = new MqttClientFactory();
         _client = factory.CreateMqttClient();
+          
+        _client.ApplicationMessageReceivedAsync += async e =>
+        {
+            var topic = e.ApplicationMessage.Topic;
+            var message = Encoding.UTF8.GetString(e.ApplicationMessage.Payload);
+
+            Console.WriteLine($"Received message on topic '{topic}': {message}");
+            
+            await HandleMessage(topic, message);
+        };
+
             
         _options = new MqttClientOptionsBuilder()
             .WithTcpServer(host, port)
@@ -55,5 +72,49 @@ public class SimpleMqttClient
         {
             Console.WriteLine($"Connection error: {ex.Message}");
         }
+    }
+     
+    public async Task SubscribeToTopics(string[] topics)
+    {
+        foreach (var topic in topics)
+        {
+            try
+            {
+                await _client.SubscribeAsync(topic);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine($"Failed to subscribe to topic: {topic} /n" + e.Message);
+            }
+            
+        }
+    }
+    
+    private async Task HandleMessage(string topic, string message)
+    {
+        if (topic == "greenhouse/sensor")
+        {
+            try
+            {
+                var sensorData = JsonSerializer.Deserialize<SensorReading>(message);
+                var data = new SensorReading()
+                {
+                    Type = sensorData.Type,
+                    Value = sensorData.Value,
+                    Unit = sensorData.Unit,
+                    Timestamp = sensorData.Timestamp,
+                    GreenhouseId = sensorData.GreenhouseId,
+                    Greenhouse = sensorData.Greenhouse
+                };
+                    //edit the data based on what is actually coming through
+            
+                _dbContext.SensorReadings.Add(data);
+                await _dbContext.SaveChangesAsync();
+            }
+            catch (JsonException e)
+            {
+                Console.WriteLine($"Failed to parse message: {e.Message}");
+            }}
+        //insert notification action and save to database if message is action
     }
 }
