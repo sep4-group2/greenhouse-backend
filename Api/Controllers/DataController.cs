@@ -11,7 +11,7 @@ public class DataController: ControllerBase
     private readonly AppDbContext _ctx;
     
     [HttpGet("{greenhouseId}")]
-    public async Task<IActionResult> GetPastDataAsync([FromRoute] int greenhouseId, [FromQuery] DateTime? beforeDate = null, [FromQuery] DateTime? afterDate = null, [FromQuery] string? sensorType = null)
+    public async Task<IActionResult> GetPastDataAsync([FromRoute] int greenhouseId, [FromQuery] DateTime? beforeDate = null, [FromQuery] DateTime? afterDate = null, [FromQuery] string? readingType = null)
     {
         List<SensorReading> sensorReadings = new List<SensorReading>();
         try
@@ -23,15 +23,21 @@ public class DataController: ControllerBase
             //Start with beforeDate: sensor readings before that specific date, INCLUDING the date itself
             if (beforeDate != null)
             {
-                sensorReadings.Where(reading =>
-                    reading.Timestamp.CompareTo(beforeDate) <= 0);
+                sensorReadings = sensorReadings.Where(reading =>
+                    reading.Timestamp.CompareTo(beforeDate) <= 0).ToList();
             }
 
             //afterDate: sensor readings after that specific date, INCLUDING the date itself
             if (afterDate != null)
             {
-                sensorReadings.Where(reading =>
-                    reading.Timestamp.CompareTo(afterDate) >= 0);
+                sensorReadings = sensorReadings.Where(reading =>
+                    reading.Timestamp.CompareTo(afterDate) >= 0).ToList();
+            }
+            
+            //sensorType: the type of the sensor reading
+            if (readingType != null)
+            {
+                sensorReadings = sensorReadings.Where(reading => reading.Type == readingType).ToList();
             }
         }
         catch (Exception e)
