@@ -26,19 +26,19 @@ public class AuthController : ControllerBase
     }
 
     [HttpPost("register")]
-    public async Task<IActionResult> Register(string email, string password, string confirmPassword)
+    public async Task<IActionResult> Register(RegisterRequestDto registerRequestDto)
     {
-        if (_context.Users.Any(u => u.email == email)) 
+        if (_context.Users.Any(u => u.email == registerRequestDto.Email)) 
             return BadRequest("Email already exists");
-        if(password != confirmPassword)
+        if(!registerRequestDto.ConfirmPassword())
             return BadRequest("Passwords do not match");
 
         var user = new User
         {
-            email = email,
+            email = registerRequestDto.Email,
             Password = "password"
         };
-        user.Password = _passwordHasher.HashPassword(user, password);
+        user.Password = _passwordHasher.HashPassword(user, registerRequestDto.Password);
         _context.Users.Add(user);
         await _context.SaveChangesAsync();
         
@@ -46,18 +46,18 @@ public class AuthController : ControllerBase
         var response = new LoginResponseDto
         {
             Token = token,
-            User = new UserDto(email, password)
+            Email = user.email
         };
         return Ok(response);
     }
 
     [HttpPost("login")]
-    public async Task<IActionResult> Login(string email, string password)
+    public async Task<IActionResult> Login(UserDto userDto)
     {
-        var user = await _context.Users.FirstOrDefaultAsync(u => u.email == email);
+        var user = await _context.Users.FirstOrDefaultAsync(u => u.email == userDto.Email);
         if(user == null)
             return Unauthorized("Invalid Email");
-        var result = _passwordHasher.VerifyHashedPassword(user, user.Password, password);
+        var result = _passwordHasher.VerifyHashedPassword(user, user.Password, userDto.Password);
         if(result == PasswordVerificationResult.Failed)
             return Unauthorized("Invalid Password");
         
@@ -65,7 +65,7 @@ public class AuthController : ControllerBase
         var response = new LoginResponseDto
         {
             Token = token,
-            User = new UserDto(email, password)
+            Email = user.email
         };
         return Ok(response);
     }
