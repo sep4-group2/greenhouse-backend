@@ -1,6 +1,8 @@
 using System.Text;
 using Api.Middleware;
+using Data.Database.Entities;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 
@@ -27,6 +29,7 @@ builder.Services.AddAuthorization();
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
 
 // Add database context
 builder.Services.AddDbContext<Data.Database.AppDbContext>(options =>
@@ -68,13 +71,11 @@ if (app.Environment.IsDevelopment() || app.Environment.IsEnvironment("LocalDocke
     app.UseSwaggerUI();
 }
 
+app.UseHttpsRedirection();
+
 app.UseAuthentication();
 
 app.UseMiddleware<AuthenticateUser>();
-
-app.UseAuthorization();
-
-app.UseHttpsRedirection();
 
 app.UseAuthorization();
 

@@ -8,10 +8,12 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
+using Microsoft.AspNetCore.Authorization;
 
 
 namespace Api.Controllers;
-
+[ApiController]
+[Route("[controller]")]
 public class AuthController : ControllerBase
 {
     private readonly AppDbContext _context;
@@ -25,8 +27,9 @@ public class AuthController : ControllerBase
         _configuration = configuration;
     }
 
+    [AllowAnonymous]
     [HttpPost("register")]
-    public async Task<IActionResult> Register(RegisterRequestDto registerRequestDto)
+    public async Task<IActionResult> Register([FromBody] RegisterRequestDto registerRequestDto)
     {
         if (_context.Users.Any(u => u.email == registerRequestDto.Email)) 
             return BadRequest("Email already exists");
@@ -36,9 +39,9 @@ public class AuthController : ControllerBase
         var user = new User
         {
             email = registerRequestDto.Email,
-            Password = "password"
+            Password = _passwordHasher.HashPassword(null, registerRequestDto.Password)
         };
-        user.Password = _passwordHasher.HashPassword(user, registerRequestDto.Password);
+        
         _context.Users.Add(user);
         await _context.SaveChangesAsync();
         
@@ -51,6 +54,7 @@ public class AuthController : ControllerBase
         return Ok(response);
     }
 
+    [AllowAnonymous]
     [HttpPost("login")]
     public async Task<IActionResult> Login(UserDto userDto)
     {
