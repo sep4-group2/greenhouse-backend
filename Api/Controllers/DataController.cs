@@ -18,6 +18,21 @@ public class DataController: ControllerBase
         {
             //First, load all sensor readings for one specific greenhouse
             sensorReadings = _ctx.SensorReadings.Where(reading => reading.GreenhouseId == greenhouseId).ToList();
+            
+            //Filterings
+            //Start with beforeDate: sensor readings before that specific date, INCLUDING the date itself
+            if (beforeDate != null)
+            {
+                sensorReadings.Where(reading =>
+                    reading.Timestamp.CompareTo(beforeDate) <= 0);
+            }
+
+            //afterDate: sensor readings after that specific date, INCLUDING the date itself
+            if (afterDate != null)
+            {
+                sensorReadings.Where(reading =>
+                    reading.Timestamp.CompareTo(afterDate) >= 0);
+            }
         }
         catch (Exception e)
         {
