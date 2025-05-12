@@ -1,3 +1,4 @@
+using Api.DTOs;
 using Data.Database;
 using Microsoft.AspNetCore.Mvc;
 
@@ -9,42 +10,55 @@ namespace Api.Controllers;
 public class DataController: ControllerBase
 {
     private readonly AppDbContext _ctx;
+    private readonly ILogger _logger;
     
     [HttpGet("{greenhouseId}")]
-    public async Task<IActionResult> GetPastDataAsync([FromRoute] int greenhouseId, [FromQuery] DateTime? beforeDate = null, [FromQuery] DateTime? afterDate = null, [FromQuery] string? readingType = null)
+    public async Task<IActionResult> GetPastDataAsync([FromRoute] int greenhouseId, [FromQuery] PastDataRequestDTO? pastDataRequest)
     {
-        List<SensorReading> sensorReadings = new List<SensorReading>();
+        List<PastDataResultDTO> result = new List<PastDataResultDTO>();
         try
         {
             //First, load all sensor readings for one specific greenhouse
-            sensorReadings = _ctx.SensorReadings.Where(reading => reading.GreenhouseId == greenhouseId).ToList();
+            var sensorReadings = _ctx.SensorReadings.Where(reading => reading.GreenhouseId == greenhouseId);
             
-            //Filterings
-            //Start with beforeDate: sensor readings before that specific date, INCLUDING the date itself
-            if (beforeDate != null)
+            //Filtering
+            if (pastDataRequest != null)
             {
-                sensorReadings = sensorReadings.Where(reading =>
-                    reading.Timestamp.CompareTo(beforeDate) <= 0).ToList();
-            }
+                //Start with beforeDate: sensor readings before that specific date, INCLUDING the date itself
+                if (pastDataRequest.BeforeDate != null)
+                {
+                    sensorReadings = sensorReadings.Where(reading =>
+                        reading.Timestamp.CompareTo(pastDataRequest.BeforeDate) <= 0);
+                }
 
-            //afterDate: sensor readings after that specific date, INCLUDING the date itself
-            if (afterDate != null)
-            {
-                sensorReadings = sensorReadings.Where(reading =>
-                    reading.Timestamp.CompareTo(afterDate) >= 0).ToList();
-            }
+                //afterDate: sensor readings after that specific date, INCLUDING the date itself
+                if (pastDataRequest.AfterDate != null)
+                {
+                    sensorReadings = sensorReadings.Where(reading =>
+                        reading.Timestamp.CompareTo(pastDataRequest.AfterDate) >= 0);
+                }
             
-            //sensorType: the type of the sensor reading
-            if (readingType != null)
-            {
-                sensorReadings = sensorReadings.Where(reading => reading.Type == readingType).ToList();
+                //sensorType: the type of the sensor reading
+                if (pastDataRequest.ReadingType != null)
+                {
+                    sensorReadings = sensorReadings.Where(reading => reading.Type == pastDataRequest.ReadingType);
+                }
+                result = sensorReadings.Select(reading => new PastDataResultDTO
+                {
+                    Id = reading.Id,
+                    Timestamp = reading.Timestamp,
+                    Type = reading.Type,
+                    Unit = reading.Unit,
+                    Value = reading.Value
+                }).ToList();
             }
         }
         catch (Exception e)
         {
-            Console.WriteLine($"Something went wrong while getting old data from the database for greenhouse {greenhouseId}: {e.Message}");
+            _logger.LogError($"Something went wrong while getting old data from the database for greenhouse {greenhouseId}: {e.Message}");
+            return StatusCode(500);
         }
         
-        return Ok(sensorReadings);
+        return Ok(result);
     }
 }
