@@ -4,26 +4,18 @@ using DataConsumer.Services;
 using Data.Database;
 using Data.Database.Entities;
 using Microsoft.EntityFrameworkCore;
+using Tests.Helpers;
 using Xunit;
 
 namespace Tests
 {
     public class SensorReadingValidatorTests
     {
-        private static AppDbContext GetInMemoryDbContext()
-        {
-            var options = new DbContextOptionsBuilder<AppDbContext>()
-                .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
-                .Options;
-
-            return new AppDbContext(options);
-        }
-
         [Fact]
         public async Task ValidateAndTriggerAsync_ShouldLog_WhenTemperatureOutOfRange()
         {
             // Arrange
-            var dbContext = GetInMemoryDbContext();
+            var dbContext = TestDbHelper.GetInMemoryDbContext();
 
             var preset = new Preset
             {
