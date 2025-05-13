@@ -2,19 +2,22 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Data.Entities;
 
-public class Notification
+namespace Data.Entities;
+
+public class Action
 {
     [Key]
     public int Id { get; set; }
 
+    public string Type { get; set; }
+    public string Status { get; set; }
     public DateTime Timestamp { get; set; }
-    public string Content { get; set; }
 
     [Required]
     public int GreenhouseId { get; set; }
 
     [ForeignKey("GreenhouseId")]
     public Greenhouse Greenhouse { get; set; }
-
-    public ICollection<User> Users { get; set; }
+    
+    
 }

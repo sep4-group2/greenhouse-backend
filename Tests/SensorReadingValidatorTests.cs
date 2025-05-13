@@ -1,8 +1,8 @@
 using System;
 using System.Threading.Tasks;
 using DataConsumer.Services;
-using Data.Database;
-using Data.Database.Entities;
+using Data;
+using Data.Entities;
 using Microsoft.EntityFrameworkCore;
 using Xunit;
 

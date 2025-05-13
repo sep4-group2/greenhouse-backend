@@ -3,7 +3,7 @@ using DataConsumer;
 using DataConsumer.Clients;
 using System.Threading;
 using Microsoft.EntityFrameworkCore;
-using Data.Database;
+using Data;
 
 // Set up configuration
 var environment = Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT") ?? "Production";

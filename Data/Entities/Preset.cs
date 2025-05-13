@@ -2,7 +2,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace Data.Database.Entities;
+namespace Data.Entities;
 public class Preset
 {
     [Key]
