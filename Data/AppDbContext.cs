@@ -58,6 +58,25 @@ public class AppDbContext : DbContext
             .HasOne(up => up.Preset)
             .WithOne()
             .HasForeignKey<UserPreset>(up => up.Id);
+        
+        modelBuilder.Entity<Preset>().HasData(new Preset
+        {
+            Id = 1,
+            Name = "Default System Preset",
+            MinTemperature = 18.0,
+            MaxTemperature = 25.0,
+            MinAirHumidity = 40.0,
+            MaxAirHumidity = 60.0,
+            MinSoilHumidity = 30.0,
+            MaxSoilHumidity = 50.0,
+            HoursOfLight = 12
+        });
+
+        modelBuilder.Entity<SystemPreset>().HasData(new SystemPreset
+        {
+            Id = 1 // Matches the Preset ID
+        });
+       
     }
     
     public DbSet<User> Users { get; set; }

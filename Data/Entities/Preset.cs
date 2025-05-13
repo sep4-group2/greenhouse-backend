@@ -22,4 +22,6 @@ public class Preset
 
     public SystemPreset SystemPreset { get; set; }
     public UserPreset UserPreset { get; set; }
+    public int? SystemPresetId { get; set; }
+    public int? UserPresetId { get; set; }
 }
