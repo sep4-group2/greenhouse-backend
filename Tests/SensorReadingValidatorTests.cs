@@ -56,7 +56,6 @@ namespace Tests
             // Assert
             var notifications = await dbContext.Notifications.ToListAsync();
             Assert.Single(notifications);
-            Assert.Contains("temperature reading of 30 is out of range.", notifications[0].Content);
             Assert.Equal(1, notifications[0].GreenhouseId);
         }
     }

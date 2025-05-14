@@ -36,7 +36,7 @@ try
     // Test database connection
     Console.WriteLine("Testing database connection...");
     var optionsBuilder = new DbContextOptionsBuilder<AppDbContext>();
-    optionsBuilder.UseNpgsql(connectionString);
+    optionsBuilder.UseSqlServer(connectionString);
     var dbContext = new AppDbContext(optionsBuilder.Options);
     using (dbContext)
     {

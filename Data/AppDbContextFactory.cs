@@ -21,7 +21,7 @@ namespace Data
 
             // Configure DbContext options
             var optionsBuilder = new DbContextOptionsBuilder<AppDbContext>();
-            optionsBuilder.UseNpgsql(connectionString); // Use PostgreSQL
+            optionsBuilder.UseSqlServer(connectionString); 
 
             return new AppDbContext(optionsBuilder.Options);
         }
