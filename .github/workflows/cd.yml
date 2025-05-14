@@ -1,0 +1,26 @@
+name: Continous Deployment
+
+on:
+  push:
+    branches:
+      - main
+      - feature/pipelines
+  workflow_dispatch:
+
+jobs:
+  build_api:
+    uses: ./.github/workflows/.build-docker-image.yml
+    with:
+      image_name: 'greenhouse-api'
+      image_tag: ${{ github.sha }}
+      dockerfile_location: './Api/Dockerfile'
+      docker_context: './Api'
+      push_to_registry: 'true'
+  build_dataconsumer:
+    uses: ./.github/workflows/.build-docker-image.yml
+    with:
+      image_name: 'greenhouse-dataconsumer'
+      image_tag: ${{ github.sha }}
+      dockerfile_location: './DataConsumer/Dockerfile'
+      docker_context: './DataConsumer'
+      push_to_registry: 'true'
