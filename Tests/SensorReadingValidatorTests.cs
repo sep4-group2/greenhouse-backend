@@ -20,14 +20,12 @@ namespace Tests
             var preset = new Preset
             {
                 Name = "Test",
-                Id = 1,
                 MinTemperature = 10,
                 MaxTemperature = 25
             };
 
             var greenhouse = new Greenhouse
             {
-                Id = 1,
                 Name = "Test Greenhouse",
                 IpAddress = "192.168.1.10",
                 LightingMethod = "bulb",
@@ -40,12 +38,13 @@ namespace Tests
             dbContext.Presets.Add(preset);
             dbContext.Greenhouses.Add(greenhouse);
             await dbContext.SaveChangesAsync();
+            var greenhouseId = greenhouse.Id;
 
             var reading = new SensorReading
             {
                 Type = "temperature",
                 Value = 30, // out of range
-                GreenhouseId = 1
+                GreenhouseId = greenhouseId
             };
 
             var validator = new SensorReadingValidator(dbContext);
