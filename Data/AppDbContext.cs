@@ -1,7 +1,8 @@
-using Data.Database.Entities;
+using Data.Entities;
 using Microsoft.EntityFrameworkCore;
+using Action = Data.Entities.Action;
 
-namespace Data.Database;
+namespace Data;
 
 public class AppDbContext : DbContext
 {
@@ -59,6 +60,12 @@ public class AppDbContext : DbContext
             .WithOne()
             .HasForeignKey<UserPreset>(up => up.Id);
         
+        // Action
+        modelBuilder.Entity<Action>()
+            .HasOne(a => a.Greenhouse)
+            .WithMany(g => g.Actions)
+            .HasForeignKey(a => a.GreenhouseId);
+        
         modelBuilder.Entity<Preset>().HasData(new Preset
         {
             Id = 1,
@@ -86,6 +93,8 @@ public class AppDbContext : DbContext
     public DbSet<UserPreset> UserPresets { get; set; }
     public DbSet<SensorReading> SensorReadings { get; set; }
     public DbSet<Notification> Notifications { get; set; }
+    
+    public DbSet<Action> Actions { get; set; }
 
 
  

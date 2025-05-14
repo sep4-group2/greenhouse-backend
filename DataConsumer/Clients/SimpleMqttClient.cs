@@ -1,7 +1,7 @@
 using System.Text;
 using System.Text.Json;
-using Data.Database;
-using Data.Database.Entities;
+using Data;
+using Data.Entities;
 using DataConsumer.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
