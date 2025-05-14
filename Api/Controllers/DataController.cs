@@ -1,64 +1,38 @@
 using Api.DTOs;
+using Api.Services;
 using Data.Database;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-
-public class DataController: ControllerBase
+public class DataController : ControllerBase
 {
-    private readonly AppDbContext _ctx;
-    private readonly ILogger _logger;
+    private readonly DataService _dataService;
+    private readonly ILogger<DataController> _logger;
+
+    public DataController(DataService dataService, ILogger<DataController> logger)
+    {
+        _dataService = dataService;
+        _logger = logger;
+    }
     
     [HttpGet("{greenhouseId}")]
     public async Task<IActionResult> GetPastDataAsync([FromRoute] int greenhouseId, [FromQuery] PastDataRequestDTO? pastDataRequest)
     {
-        List<PastDataResultDTO> result = new List<PastDataResultDTO>();
         try
         {
-            //First, load all sensor readings for one specific greenhouse
-            var sensorReadings = _ctx.SensorReadings.Where(reading => reading.GreenhouseId == greenhouseId);
+            var result =
+                _dataService.GetPastDataAsync(greenhouseId, pastDataRequest);
             
-            //Filtering
-            if (pastDataRequest != null)
-            {
-                //Start with beforeDate: sensor readings before that specific date, INCLUDING the date itself
-                if (pastDataRequest.BeforeDate != null)
-                {
-                    sensorReadings = sensorReadings.Where(reading =>
-                        reading.Timestamp.CompareTo(pastDataRequest.BeforeDate) <= 0);
-                }
-
-                //afterDate: sensor readings after that specific date, INCLUDING the date itself
-                if (pastDataRequest.AfterDate != null)
-                {
-                    sensorReadings = sensorReadings.Where(reading =>
-                        reading.Timestamp.CompareTo(pastDataRequest.AfterDate) >= 0);
-                }
-            
-                //sensorType: the type of the sensor reading
-                if (pastDataRequest.ReadingType != null)
-                {
-                    sensorReadings = sensorReadings.Where(reading => reading.Type == pastDataRequest.ReadingType);
-                }
-                result = sensorReadings.Select(reading => new PastDataResultDTO
-                {
-                    Id = reading.Id,
-                    Timestamp = reading.Timestamp,
-                    Type = reading.Type,
-                    Unit = reading.Unit,
-                    Value = reading.Value
-                }).ToList();
-            }
+            return Ok(result);
         }
         catch (Exception e)
         {
             _logger.LogError($"Something went wrong while getting old data from the database for greenhouse {greenhouseId}: {e.Message}");
             return StatusCode(500);
         }
-        
-        return Ok(result);
     }
 }
