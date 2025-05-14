@@ -1,51 +1,25 @@
 ﻿using System.Security.Claims;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Filters;
 
 namespace Api.Middleware;
 
-public class AuthenticateUser
+public class AuthenticateUser : Attribute, IActionFilter
 {
-    private readonly RequestDelegate _next;
-
-    public AuthenticateUser(RequestDelegate next)
+    public void OnActionExecuted(ActionExecutedContext context)
     {
-        _next = next;
-    }
+        var user = context.HttpContext.User;
+        var email = user.FindFirstValue(ClaimTypes.Email);
 
-    public async Task Invoke(HttpContext context)
-    {
-        var path = context.Request.Path.Value?.ToLowerInvariant();
-        if (path is not null &&
-            (path.StartsWith("/swagger") ||      
-             path.StartsWith("/favicon")||
-             path.StartsWith("/auth/register")||
-             path.StartsWith("/auth/login"))) 
-        {
-            await _next(context);
-            return;
-        }
-        if (!(context.User.Identity?.IsAuthenticated ?? false))
-        {
-            if (!context.Response.HasStarted)
-            {
-                context.Response.StatusCode = StatusCodes.Status401Unauthorized;
-                await context.Response.WriteAsync("Unauthorised: JWT token is missing or invalid.");
-            }
-
-            return;
-        }
-        var email = context.User.FindFirstValue(ClaimTypes.Email);
         if (string.IsNullOrEmpty(email))
         {
-            if (!context.Response.HasStarted)
-            {
-                context.Response.StatusCode = StatusCodes.Status401Unauthorized;
-                await context.Response.WriteAsync("Unauthorised: Email claim not found");
-            }
-
-            return;
+            context.Result = new UnauthorizedObjectResult("Unauthorized: Email claim missing");
         }
-        context.Items["Email"] = email;
-        await _next(context);
+        context.HttpContext.Items["Email"] = email;
     }
-     
+
+    public void OnActionExecuting(ActionExecutingContext context)
+    {
+        
+    }
 }

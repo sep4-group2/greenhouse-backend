@@ -27,7 +27,7 @@ public class AuthController : ControllerBase
         _configuration = configuration;
     }
 
-    [AllowAnonymous]
+    
     [HttpPost("register")]
     public async Task<IActionResult> Register([FromBody] RegisterRequestDto registerRequestDto)
     {
@@ -45,16 +45,17 @@ public class AuthController : ControllerBase
         _context.Users.Add(user);
         await _context.SaveChangesAsync();
         
-        var token = GenerateJwtToken(user);
-        var response = new LoginResponseDto
+        var accessToken = GenerateJwtToken(user);
+        var refreshToken = GenerateRefreshToken(user);
+        var response = new AuthResponseDto
         {
-            Token = token,
+            AccessToken = accessToken,
+            RefreshToken = refreshToken,
             Email = user.email
         };
         return Ok(response);
     }
-
-    [AllowAnonymous]
+    
     [HttpPost("login")]
     public async Task<IActionResult> Login(UserDto userDto)
     {
@@ -65,13 +66,40 @@ public class AuthController : ControllerBase
         if(result == PasswordVerificationResult.Failed)
             return Unauthorized("Invalid Password");
         
-        var token = GenerateJwtToken(user);
-        var response = new LoginResponseDto
+        var accessToken = GenerateJwtToken(user);
+        var refreshToken = GenerateRefreshToken(user);
+        var response = new AuthResponseDto
         {
-            Token = token,
+            AccessToken = accessToken,
+            RefreshToken = refreshToken,
             Email = user.email
         };
         return Ok(response);
+    }
+
+    [HttpPost("refresh")]
+    public async Task<IActionResult> Refresh([FromBody] string refreshToken)
+    {
+        var principal = getPrincipalFromExpiredToken(refreshToken, _configuration["Jwt:RefreshKey"]);
+        if(principal == null)
+            return Unauthorized();
+        var email = principal.FindFirstValue(ClaimTypes.Email);
+        var tokenType = principal.FindFirst("token_type")?.Value;
+        
+        if(tokenType != "refresh")
+            return Unauthorized("Invalid token type");
+        
+        var user = await _context.Users.FirstOrDefaultAsync(u => u.email == email);
+        if (user == null)
+            return Unauthorized("User not found");
+        var newAccessToken = GenerateJwtToken(user);
+        var newRefreshToken = GenerateRefreshToken(user);
+        
+        return Ok(new
+        {
+            toke = newAccessToken,
+            refreshToken = newRefreshToken
+        });
     }
 
     private string GenerateJwtToken(User user)
@@ -89,10 +117,47 @@ public class AuthController : ControllerBase
             issuer: _configuration["Jwt:Issuer"],
             audience: _configuration["Jwt:Audience"],
             claims: claims,
-            expires: DateTime.UtcNow.AddMinutes(int.Parse(_configuration["Jwt:Expiration"])),
+            expires: DateTime.UtcNow.AddMinutes(int.Parse(_configuration["Jwt:AccessTokenMinutes"])),
             signingCredentials: credentials
         );
         return new JwtSecurityTokenHandler().WriteToken(token);
     }
-    
+
+    private string GenerateRefreshToken(User user)
+    {
+        var refreshKey = Encoding.UTF8.GetBytes(_configuration["Jwt:RefreshKey"]);
+        var claims = new[]
+        {
+            new Claim(ClaimTypes.Email, user.email),
+            new Claim("token_type", "refresh")
+        };
+        var credentials = new SigningCredentials(new SymmetricSecurityKey(refreshKey), SecurityAlgorithms.HmacSha256);
+
+        var token = new JwtSecurityToken(
+            issuer: _configuration["Jwt:Issuer"],
+            audience: _configuration["Jwt:Audience"],
+            claims: claims,
+            expires: DateTime.UtcNow.AddDays(int.Parse(_configuration["Jwt:RefreshTokenDays"])),
+            signingCredentials: credentials);
+        
+        return new JwtSecurityTokenHandler().WriteToken(token);
+    }
+
+    private ClaimsPrincipal? getPrincipalFromExpiredToken(string token, string key)
+    {
+        var tokenHandler = new JwtSecurityTokenHandler();
+        var principal = tokenHandler.ValidateToken(token, new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = _configuration["Jwt:Issuer"],
+            ValidAudience = _configuration["Jwt:Audience"],
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key)),
+            ValidateLifetime = false
+        }, out SecurityToken securityToken);
+        if(securityToken is not JwtSecurityToken jwt || jwt.Header.Alg != SecurityAlgorithms.HmacSha256)
+            return null;
+        return principal;
+    }
 }

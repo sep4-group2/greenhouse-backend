@@ -1,5 +1,4 @@
 using System.Text;
-using Api.Middleware;
 using Data.Database.Entities;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
@@ -72,10 +71,6 @@ if (app.Environment.IsDevelopment() || app.Environment.IsEnvironment("LocalDocke
 }
 
 app.UseHttpsRedirection();
-
-app.UseAuthentication();
-
-app.UseMiddleware<AuthenticateUser>();
 
 app.UseAuthorization();
 
