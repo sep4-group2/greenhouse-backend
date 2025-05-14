@@ -1,7 +1,8 @@
-using Data.Database.Entities;
+using Data.Entities;
 using Microsoft.EntityFrameworkCore;
+using Action = Data.Entities.Action;
 
-namespace Data.Database;
+namespace Data;
 
 public class AppDbContext : DbContext
 {
@@ -58,6 +59,31 @@ public class AppDbContext : DbContext
             .HasOne(up => up.Preset)
             .WithOne()
             .HasForeignKey<UserPreset>(up => up.Id);
+        
+        // Action
+        modelBuilder.Entity<Action>()
+            .HasOne(a => a.Greenhouse)
+            .WithMany(g => g.Actions)
+            .HasForeignKey(a => a.GreenhouseId);
+        
+        modelBuilder.Entity<Preset>().HasData(new Preset
+        {
+            Id = 1,
+            Name = "Default System Preset",
+            MinTemperature = 18.0,
+            MaxTemperature = 25.0,
+            MinAirHumidity = 40.0,
+            MaxAirHumidity = 60.0,
+            MinSoilHumidity = 30.0,
+            MaxSoilHumidity = 50.0,
+            HoursOfLight = 12
+        });
+
+        modelBuilder.Entity<SystemPreset>().HasData(new SystemPreset
+        {
+            Id = 1 // Matches the Preset ID
+        });
+       
     }
     
     public DbSet<User> Users { get; set; }
@@ -67,6 +93,8 @@ public class AppDbContext : DbContext
     public DbSet<UserPreset> UserPresets { get; set; }
     public DbSet<SensorReading> SensorReadings { get; set; }
     public DbSet<Notification> Notifications { get; set; }
+    
+    public DbSet<Action> Actions { get; set; }
 
 
  

@@ -1,7 +1,7 @@
 using System.Text.Json;
 using MQTTnet;
 
-namespace Tests;
+namespace Tests.Helpers;
 
 public static class TestPublisher
 {

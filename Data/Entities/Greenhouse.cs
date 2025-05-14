@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace Data.Database.Entities;
+namespace Data.Entities;
 
 public class Greenhouse
 {
@@ -24,4 +24,6 @@ public class Greenhouse
 
     public ICollection<SensorReading> SensorReadings { get; set; }
     public ICollection<Notification> Notifications { get; set; }
+    
+    public ICollection<Action> Actions { get; set; }
 }

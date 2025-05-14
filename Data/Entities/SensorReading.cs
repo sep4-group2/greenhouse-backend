@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using Data.Database.Entities;
+using Data.Entities;
 
 public class SensorReading
 {

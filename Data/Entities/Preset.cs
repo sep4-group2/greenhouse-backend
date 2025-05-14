@@ -2,7 +2,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace Data.Database.Entities;
+namespace Data.Entities;
 public class Preset
 {
     [Key]
@@ -22,4 +22,6 @@ public class Preset
 
     public SystemPreset SystemPreset { get; set; }
     public UserPreset UserPreset { get; set; }
+    public int? SystemPresetId { get; set; }
+    public int? UserPresetId { get; set; }
 }

@@ -1,5 +1,5 @@
-using Data.Database;
-using Data.Database.Entities;
+using Data;
+using Data.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace DataConsumer.Services;
