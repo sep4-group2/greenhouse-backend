@@ -1,4 +1,5 @@
 using Api.DTOs;
+using Api.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Controllers;
@@ -7,6 +8,14 @@ namespace Api.Controllers;
 [Route("api/[controller]")]
 public class NotificationController: ControllerBase
 {
+    INotificationService _notificationService;
+    ILogger<NotificationController> _logger;
+
+    public NotificationController(INotificationService notificationService, ILogger<NotificationController> logger)
+    {
+        _notificationService = notificationService;
+        _logger = logger;
+    }
     //Two endpoints needed 
     //One for fetching the public VAPID key
     //One for saving subscriptions
@@ -14,11 +23,17 @@ public class NotificationController: ControllerBase
     
     //Endpoint for clients to fetch the public VAPID key needed to subscribe
     [HttpGet]
-    public IActionResult GetPublicKey()
+    public async Task<IActionResult> GetPublicKey()
     {
-        //The public key needs to be fetched from wherever it is stored
-        //TO BE IMPLEMENTED
-        var publicKey = new VAPIDKeyDTO();
-        return Ok(publicKey);
+        try
+        {
+            var publicKey = await _notificationService.GetPublicKey();
+            return Ok(publicKey);
+        }
+        catch (Exception e)
+        {
+            _logger.LogError($"Something went wrong while fetching the public VAPID key: {e.Message}" );
+            return StatusCode(500);
+        }
     }
 }
