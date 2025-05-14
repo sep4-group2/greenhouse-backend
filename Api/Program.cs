@@ -8,6 +8,7 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddScoped<DataService>();
+builder.Services.AddScoped<ActionService>();
 // Add database context
 builder.Services.AddDbContext<Data.AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
