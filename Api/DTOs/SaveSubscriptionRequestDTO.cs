@@ -1,8 +1,7 @@
 namespace Api.DTOs;
 
-public class SaveSubscriptionDTO
+public class SaveSubscriptionRequestDTO
 {
-    public string userEmail { get; set;}
     public string Endpoint { get; set; }
     public string P256dh { get; set; }
     public string Auth { get; set; }

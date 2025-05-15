@@ -37,6 +37,32 @@ public class NotificationController: ControllerBase
         }
     }
     
+    
+    //NEEDS AUTHORIZATION
     //Endpoint for saving a subscription
-    //Should this endpoint contain user email, or the greenhouse id to save it to the appropriate place?
+    [HttpPost("save-subscription")]
+    public async Task<IActionResult> SaveSubscription([FromBody] SaveSubscriptionRequestDTO subscription)
+    {
+        try
+        {
+            //Using jwt first get the user email
+            //TO BE IMPLEMENTED
+            string email = "";
+
+            await _notificationService.SaveSubscription(
+                new SaveSubscriptionDTO()
+                {
+                    Auth = subscription.Auth,
+                    Endpoint = subscription.Endpoint,
+                    P256dh = subscription.P256dh,
+                    userEmail = email
+                });
+            return Created();
+        }
+        catch (Exception e)
+        {
+            _logger.LogError($"Something went wrong while trying to save the subscription: {e.Message}");
+            return StatusCode(500);
+        }
+    }
 }
