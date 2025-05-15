@@ -1,10 +1,10 @@
 using Api.Services;
-using Data.Database.Entities;
+using Data.Entities;
 using Tests.Helpers;
 
 namespace Tests
 {
-    public class SensorDataServiceTests
+    public class DataServiceTests
     {
         [Fact]
         public async Task GetCurrentDataAsync_ReturnsLatestSensorReadingsWithPresetBounds()
@@ -14,7 +14,6 @@ namespace Tests
 
             var preset = new Preset
             {
-                Id = 1,
                 Name = "Test Preset",
                 MinTemperature = 10,
                 MaxTemperature = 30,
@@ -26,7 +25,6 @@ namespace Tests
 
             var greenhouse = new Greenhouse
             {
-                Id = 1,
                 Name = "GH Test",
                 IpAddress = "192.168.0.1",
                 LightingMethod = "LED",
@@ -38,6 +36,9 @@ namespace Tests
 
             dbContext.Presets.Add(preset);
             dbContext.Greenhouses.Add(greenhouse);
+            await dbContext.SaveChangesAsync();
+            var greenhouseId = greenhouse.Id;
+            
             dbContext.SensorReadings.AddRange(new[]
             {
                 new SensorReading
@@ -46,7 +47,7 @@ namespace Tests
                     Value = 32,
                     Unit = "°C",
                     Timestamp = DateTime.UtcNow.AddMinutes(-1),
-                    GreenhouseId = 1
+                    GreenhouseId = greenhouseId
                 },
                 new SensorReading
                 {
@@ -54,7 +55,7 @@ namespace Tests
                     Value = 55,
                     Unit = "%",
                     Timestamp = DateTime.UtcNow.AddMinutes(-2),
-                    GreenhouseId = 1
+                    GreenhouseId = greenhouseId
                 },
                 new SensorReading
                 {
@@ -62,7 +63,7 @@ namespace Tests
                     Value = 42,
                     Unit = "%",
                     Timestamp = DateTime.UtcNow.AddMinutes(-3),
-                    GreenhouseId = 1
+                    GreenhouseId = greenhouseId
                 }
             });
 
