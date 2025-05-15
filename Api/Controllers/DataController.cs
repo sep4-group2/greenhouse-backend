@@ -1,8 +1,6 @@
 using Api.DTOs;
 using Api.Services;
-using Data.Database;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace Api.Controllers;
 
@@ -32,6 +30,21 @@ public class DataController : ControllerBase
         catch (Exception e)
         {
             _logger.LogError($"Something went wrong while getting old data from the database for greenhouse {greenhouseId}: {e.Message}");
+            return StatusCode(500);
+        }
+    }
+    
+    [HttpGet("current-sensor-readings/{greenhouseId}")]
+    public async Task<IActionResult> GetCurrentDataAsync([FromRoute] int greenhouseId)
+    {
+        try
+        {
+            var result = await _dataService.GetCurrentDataAsync(greenhouseId);
+            return Ok(result);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, $"Error fetching sensor data for greenhouse {greenhouseId}");
             return StatusCode(500);
         }
     }

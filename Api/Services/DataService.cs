@@ -1,5 +1,5 @@
 using Api.DTOs;
-using Data.Database;
+using Data;
 using Microsoft.EntityFrameworkCore;
 
 namespace Api.Services;
