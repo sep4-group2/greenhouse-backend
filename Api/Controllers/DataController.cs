@@ -1,6 +1,6 @@
 using Api.DTOs;
 using Api.Services;
-using Data.Database;
+using Data;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 

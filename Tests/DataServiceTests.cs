@@ -1,5 +1,5 @@
 using Api.Services;
-using Data.Database.Entities;
+using Data.Entities;
 using Tests.Helpers;
 
 namespace Tests
