@@ -6,7 +6,7 @@ namespace Api.Services;
 
 public class ActionService(AppDbContext context)
 {
-    public async Task<List<ActionResultDTO>> GetActionsForPeriodAsync(int greenhouseId, DateTime start, DateTime end)
+    public async Task<List<ActionResultDTO>> PrepareActionsForPeriodAsync(int greenhouseId, DateTime start, DateTime end)
     {
         var actions = await context.Actions
             .Where(a => a.GreenhouseId == greenhouseId &&

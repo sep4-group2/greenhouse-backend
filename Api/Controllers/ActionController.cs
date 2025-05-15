@@ -17,14 +17,14 @@ public class ActionController : ControllerBase
         _logger = logger;
     }
 
-    [HttpPost("past-actions/{greenhouseId}")]
+    [HttpPost("{greenhouseId}/past-actions")]
     public async Task<IActionResult> GetActionHistoryAsync(
         [FromRoute] int greenhouseId, 
         [FromBody] ActionQueryDTO query)
     {
         try
         {
-            var actions = await _service.GetActionsForPeriodAsync(greenhouseId, query.StartDate, query.EndDate);
+            var actions = await _service.PrepareActionsForPeriodAsync(greenhouseId, query.StartDate, query.EndDate);
             return Ok(actions);
         }
         catch (Exception ex)

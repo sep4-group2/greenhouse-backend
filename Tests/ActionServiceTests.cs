@@ -66,7 +66,7 @@ namespace Tests
             var service = new ActionService(dbContext);
 
             // Act
-            var result = await service.GetActionsForPeriodAsync(
+            var result = await service.PrepareActionsForPeriodAsync(
                 greenhouseId,
                 now.AddHours(-2),
                 now
