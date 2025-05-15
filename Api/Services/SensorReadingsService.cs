@@ -1,22 +1,22 @@
 using Api.DTOs;
 using Data;
-using Data.Database.Utils;
+using Data.Utils;
 using Microsoft.EntityFrameworkCore;
 
 namespace Api.Services;
 
-public class DataService
+public class SensorReadingsService
 {
     private readonly AppDbContext _ctx;
 
-    public DataService(AppDbContext ctx)
+    public SensorReadingsService(AppDbContext ctx)
     {
         _ctx = ctx;
     }
 
-    public async Task<List<CurrentDataResultDTO>> GetCurrentDataAsync(int greenhouseId)
+    public async Task<List<CurrentSensorReadingResultDTO>> PrepareCurrentSensorReadingsAsync(int greenhouseId)
     {
-        var result = new List<CurrentDataResultDTO>();
+        var result = new List<CurrentSensorReadingResultDTO>();
 
         var sensorReadings = await _ctx.SensorReadings
             .Where(r => r.GreenhouseId == greenhouseId)
@@ -49,7 +49,7 @@ public class DataService
                 _ => (0.0, 0.0)
             };
 
-            result.Add(new CurrentDataResultDTO
+            result.Add(new CurrentSensorReadingResultDTO
             {
                 Id = latest.Id,
                 Type = latest.Type,
@@ -64,9 +64,9 @@ public class DataService
         return result;
     }
 
-    public async Task<List<PastDataResultDTO>> GetPastDataAsync(int greenhouseId, PastDataRequestDTO? pastDataRequest)
+    public async Task<List<PastSensorReadingResultDTO>> PreparePastSensorReadingsAsync(int greenhouseId, PastSensorReadingRequestDTO? pastDataRequest)
     {
-        List<PastDataResultDTO> result = new List<PastDataResultDTO>();
+        List<PastSensorReadingResultDTO> result = new List<PastSensorReadingResultDTO>();
             
         //First, load all sensor readings for one specific greenhouse
         var sensorReadings = _ctx.SensorReadings.Where(reading => reading.GreenhouseId == greenhouseId);
@@ -93,7 +93,7 @@ public class DataService
             {
                 sensorReadings = sensorReadings.Where(reading => reading.Type == pastDataRequest.ReadingType);
             }
-            result = sensorReadings.Select(reading => new PastDataResultDTO
+            result = sensorReadings.Select(reading => new PastSensorReadingResultDTO
             {
                 Id = reading.Id,
                 Timestamp = reading.Timestamp,
