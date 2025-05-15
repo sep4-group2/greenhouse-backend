@@ -4,11 +4,19 @@ namespace Api.Services;
 
 public class NotificationService: INotificationService
 {
+    private readonly IConfiguration _configuration;
+    public NotificationService(IConfiguration configuration)
+    {
+        _configuration = configuration;
+    }
     public Task<VAPIDKeyDTO> GetPublicKey()
     {
-        //This needs to be changed as well
-        //We need to store and get the VAPID keys from somewhere, they cannot just float out in the open unfortunately
-        return Task.FromResult(new VAPIDKeyDTO());
+        //Gets public VAPID key from appsettings.json
+        //Needs to be changed to cloud vault later on!
+        return Task.FromResult(new VAPIDKeyDTO()
+        {
+            publicKey = _configuration.GetValue<string>("VAPIDKeys:PublicKey"),
+        });
     }
 
     public Task SaveSubscription(SaveSubscriptionDTO subscription)
