@@ -22,7 +22,7 @@ public class NotificationController: ControllerBase
 
     
     //Endpoint for clients to fetch the public VAPID key needed to subscribe
-    [HttpGet]
+    [HttpGet("/public-key")]
     public async Task<IActionResult> GetPublicKey()
     {
         try
@@ -36,4 +36,7 @@ public class NotificationController: ControllerBase
             return StatusCode(500);
         }
     }
+    
+    //Endpoint for saving a subscription
+    //Should this endpoint contain user email, or the greenhouse id to save it to the appropriate place?
 }
