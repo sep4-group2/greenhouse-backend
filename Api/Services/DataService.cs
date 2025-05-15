@@ -1,5 +1,6 @@
 using Api.DTOs;
 using Data;
+using Data.Database.Utils;
 using Microsoft.EntityFrameworkCore;
 
 namespace Api.Services;
@@ -28,7 +29,7 @@ public class DataService
         if (greenhouse?.ActivePreset == null)
             return result;
 
-        var types = new[] { "temperature", "air humidity", "soil humidity" };
+        var types = new[] { SensorReadingType.Temperature, SensorReadingType.AirHumidity, SensorReadingType.SoilHumidity };
 
         foreach (var type in types)
         {
@@ -42,9 +43,9 @@ public class DataService
 
             var bounds = type switch
             {
-                "temperature" => (greenhouse.ActivePreset.MinTemperature, greenhouse.ActivePreset.MaxTemperature),
-                "air humidity" => (greenhouse.ActivePreset.MinAirHumidity, greenhouse.ActivePreset.MaxAirHumidity),
-                "soil humidity" => (greenhouse.ActivePreset.MinSoilHumidity, greenhouse.ActivePreset.MaxSoilHumidity),
+                SensorReadingType.Temperature => (greenhouse.ActivePreset.MinTemperature, greenhouse.ActivePreset.MaxTemperature),
+                SensorReadingType.AirHumidity => (greenhouse.ActivePreset.MinAirHumidity, greenhouse.ActivePreset.MaxAirHumidity),
+                SensorReadingType.SoilHumidity => (greenhouse.ActivePreset.MinSoilHumidity, greenhouse.ActivePreset.MaxSoilHumidity),
                 _ => (0.0, 0.0)
             };
 
