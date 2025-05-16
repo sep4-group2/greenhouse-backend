@@ -1,19 +1,19 @@
-Collecting workspace information# Greenhouse Backend System
+# 🌱 Greenhouse Backend System
 
 This repository contains the backend services for the greenhouse monitoring and control system. The system consists of several components that work together to collect, process, and serve greenhouse sensor data.
 
-## Project Components
+## 📦 Project Components
 
-- **API Service**: REST API that serves greenhouse data to frontend applications
-- **Data Consumer**: Service that subscribes to MQTT topics, processes incoming sensor data, and stores it in the database
-- **MQTT Broker**: Mosquitto broker for message handling between IoT devices and backend services
-- **SQL Server Database**: Stores greenhouse data, sensor readings, and configuration
+- **🖥️ API Service**: REST API that serves greenhouse data to frontend applications
+- **📊 Data Consumer**: Service that subscribes to MQTT topics, processes incoming sensor data, and stores it in the database
+- **📡 MQTT Broker**: Mosquitto broker for message handling between IoT devices and backend services
+- **🗄️ SQL Server Database**: Stores greenhouse data, sensor readings, and configuration
 
-## Running the Project
+## 🚀 Running the Project
 
 There are two main ways to run this project:
 
-### Option 1: Full Docker Deployment
+### Option 1: Full Docker Deployment 🐳
 
 This option runs all components in Docker containers:
 
@@ -26,12 +26,12 @@ docker compose --profile full up
 ```
 
 This will start:
-- SQL Server database on port 1433
-- Mosquitto MQTT broker on port 1883
-- API service on port 5050
-- Data Consumer service
+- 🗄️ SQL Server database on port 1433
+- 📡 Mosquitto MQTT broker on port 1883
+- 🖥️ API service on port 5050 (http://localhost:5050)
+- 📊 Data Consumer service
 
-### Option 2: Infrastructure in Docker + Services in IDE
+### Option 2: Infrastructure in Docker + Services in IDE 💻
 
 This option runs the infrastructure (database and MQTT) in Docker while running the API and Data Consumer in your IDE for development:
 
@@ -47,7 +47,12 @@ docker compose up
    - For the API project, run it directly from Rider
    - For the Data Consumer, run it from Rider with the "Development" configuration
 
-## Configuration
+When running in development mode:
+- 🖥️ API typically runs at: https://localhost:7001 and http://localhost:5000
+- 📡 MQTT broker is available at: localhost:1883
+- 🗄️ SQL Server is available at: localhost:1433
+
+## ⚙️ Configuration
 
 The project uses different configuration files for different environments:
 
@@ -57,7 +62,7 @@ The project uses different configuration files for different environments:
 
 Environment-specific settings like connection strings and MQTT broker addresses are configured in these files and can be overridden using environment variables.
 
-## Environment Variables
+## 🔧 Environment Variables
 
 Key environment variables:
 
@@ -65,7 +70,7 @@ Key environment variables:
 - **MQTT__Host**: MQTT broker hostname (defaults to "mqtt" in Docker, "localhost" in development)
 - **MQTT__Port**: MQTT broker port (defaults to 1883)
 
-## Azure Integration
+## ☁️ Azure Integration
 
 In production, the system integrates with:
 - Azure Key Vault for secrets management
@@ -74,7 +79,7 @@ In production, the system integrates with:
 
 The Azure integration is automatically enabled when the environment is "Production" or "Release".
 
-## Project Structure
+## 📂 Project Structure
 
 - **Api/**: ASP.NET Core Web API project
 - **Data/**: Shared data access library with Entity Framework Core
@@ -82,7 +87,7 @@ The Azure integration is automatically enabled when the environment is "Producti
 - **Tests/**: Unit and integration tests
 - **mosquitto/**: Mosquitto configuration
 
-## Development Workflow
+## 🔄 Development Workflow
 
 1. Make your code changes in Rider using Option 2 (Development Configuration)
 2. Test locally using the Docker infrastructure
