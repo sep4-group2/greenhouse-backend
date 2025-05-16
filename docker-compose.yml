@@ -2,17 +2,17 @@ version: '3.8'
 
 services:
   db:
-    image: postgres:16
-    container_name: local_postgres
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: local_mssql
     restart: always
     environment:
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: mydatabase
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=YourStrong@Passw0rd
+      - MSSQL_PID=Express
     ports:
-      - "5432:5432"
+      - "1433:1433"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - mssql_data:/var/opt/mssql
 
   mqtt:
     image: eclipse-mosquitto:2.0
@@ -56,4 +56,4 @@ services:
       - DOTNET_ENVIRONMENT=LocalDocker
 
 volumes:
-  postgres_data:
+  mssql_data:
