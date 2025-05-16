@@ -17,43 +17,33 @@ var app = builder.Build();
 
 // write line database connection string
 Console.WriteLine($"Database connection string: {builder.Configuration.GetConnectionString("DefaultConnection")}");
-var scope = app.Services.CreateScope();
-    var services = scope.ServiceProvider;
 
-var dbContext = services.GetRequiredService<Data.AppDbContext>();
-            dbContext.Database.EnsureCreated();
-
-// Test database connection
-// using (var scope = app.Services.CreateScope())
-// {
-//     var services = scope.ServiceProvider;
-//     try
-//     {
-//         var dbContext = services.GetRequiredService<Data.AppDbContext>();
-//         if (dbContext.Database.CanConnect())
-//         {
-//             app.Logger.LogInformation("Successfully connected to the database!");
-//             // Ensure database is created
-//             app.Logger.LogInformation("Database exists or has been created.");
-//         }
-//         else
-//         {
-//             // log error and what happened
-//             app.Logger.LogError("Failed to connect to the database.");
-//         }
-//     }
-//     catch (Exception ex)
-//     {
-//         app.Logger.LogError(ex, "An error occurred while testing database connection.");
-//     }
-// }
-
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment() || app.Environment.IsEnvironment("LocalDocker"))
+using (var scope = app.Services.CreateScope())
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
+    var services = scope.ServiceProvider;
+    try
+    {
+        var dbContext = services.GetRequiredService<Data.AppDbContext>();
+        if (dbContext.Database.CanConnect())
+        {
+            app.Logger.LogInformation("Successfully connected to the database!");
+            // Ensure database is created
+            app.Logger.LogInformation("Database exists or has been created.");
+        }
+        else
+        {
+            // log error and what happened
+            app.Logger.LogError("Failed to connect to the database.");
+        }
+    }
+    catch (Exception ex)
+    {
+        app.Logger.LogError(ex, "An error occurred while testing database connection.");
+    }
 }
+
+app.UseSwagger();
+app.UseSwaggerUI();
 
 app.UseHttpsRedirection();
 
