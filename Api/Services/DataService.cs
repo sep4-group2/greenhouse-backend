@@ -1,5 +1,8 @@
 using Api.DTOs;
 using Data;
+
+using Data.Database.Utils;
+
 using Microsoft.EntityFrameworkCore;
 
 namespace Api.Services;
@@ -28,7 +31,7 @@ public class DataService
         if (greenhouse?.ActivePreset == null)
             return result;
 
-        var types = new[] { "temperature", "air humidity", "soil humidity" };
+        var types = new[] { SensorReadingType.Temperature, SensorReadingType.AirHumidity, SensorReadingType.SoilHumidity };
 
         foreach (var type in types)
         {
@@ -42,9 +45,9 @@ public class DataService
 
             var bounds = type switch
             {
-                "temperature" => (greenhouse.ActivePreset.MinTemperature, greenhouse.ActivePreset.MaxTemperature),
-                "air humidity" => (greenhouse.ActivePreset.MinAirHumidity, greenhouse.ActivePreset.MaxAirHumidity),
-                "soil humidity" => (greenhouse.ActivePreset.MinSoilHumidity, greenhouse.ActivePreset.MaxSoilHumidity),
+                SensorReadingType.Temperature => (greenhouse.ActivePreset.MinTemperature, greenhouse.ActivePreset.MaxTemperature),
+                SensorReadingType.AirHumidity => (greenhouse.ActivePreset.MinAirHumidity, greenhouse.ActivePreset.MaxAirHumidity),
+                SensorReadingType.SoilHumidity => (greenhouse.ActivePreset.MinSoilHumidity, greenhouse.ActivePreset.MaxSoilHumidity),
                 _ => (0.0, 0.0)
             };
 
@@ -62,4 +65,47 @@ public class DataService
 
         return result;
     }
+
+    public async Task<List<PastDataResultDTO>> GetPastDataAsync(int greenhouseId, PastDataRequestDTO? pastDataRequest)
+    {
+        List<PastDataResultDTO> result = new List<PastDataResultDTO>();
+            
+        //First, load all sensor readings for one specific greenhouse
+        var sensorReadings = _ctx.SensorReadings.Where(reading => reading.GreenhouseId == greenhouseId);
+            
+        //Filtering
+        if (pastDataRequest != null)
+        {
+            //Start with beforeDate: sensor readings before that specific date, INCLUDING the date itself
+            if (pastDataRequest.BeforeDate != null)
+            {
+                sensorReadings = sensorReadings.Where(reading =>
+                    reading.Timestamp.CompareTo(pastDataRequest.BeforeDate) <= 0);
+            }
+
+            //afterDate: sensor readings after that specific date, INCLUDING the date itself
+            if (pastDataRequest.AfterDate != null)
+            {
+                sensorReadings = sensorReadings.Where(reading =>
+                    reading.Timestamp.CompareTo(pastDataRequest.AfterDate) >= 0);
+            }
+            
+            //sensorType: the type of the sensor reading
+            if (pastDataRequest.ReadingType != null)
+            {
+                sensorReadings = sensorReadings.Where(reading => reading.Type == pastDataRequest.ReadingType);
+            }
+            result = sensorReadings.Select(reading => new PastDataResultDTO
+            {
+                Id = reading.Id,
+                Timestamp = reading.Timestamp,
+                Type = reading.Type,
+                Unit = reading.Unit,
+                Value = reading.Value
+            }).ToList();
+        }
+
+        return result;
+    }
+    
 }
