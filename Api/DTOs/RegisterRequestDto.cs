@@ -15,6 +15,6 @@ public class RegisterRequestDto
 
     public bool ConfirmPassword()
     {
-        return Password != PasswordConfirmation;
+        return Password == PasswordConfirmation;
     }
 }
