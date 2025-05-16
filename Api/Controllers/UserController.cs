@@ -1,43 +1,27 @@
 ﻿using System.Security.Claims;
+using Api.DTOs;
+using Api.Middleware;
+using Api.Services;
+using Data.Entities;
 using Microsoft.AspNetCore.Mvc;
-using Data.Database;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.EntityFrameworkCore;
 
 namespace Api.Controllers;
 [ApiController]
 [Route("api/[controller]")]
 public class UserController : ControllerBase
 {
-    private readonly AppDbContext _context;
+    private readonly UserService _userService;
 
-    public UserController(AppDbContext context)
+    public UserController(UserService userService)
     {
-        _context = context;
+        _userService = userService;
     }
 
-    [Authorize]
-    [HttpDelete("delete")]
-    public async Task<IActionResult> DeleteUser([FromBody] string email)
+    [HttpDelete]
+    [AuthenticateUser]
+    public async Task<ActionResult<UserDto>> DeleteUser()
     {
-        var user = await _context.Users.FirstOrDefaultAsync(u => u.email == email);
-        if (user == null)
-        {
-            return NotFound("User not found");
-        }
-        _context.Users.Remove(user);
-        await _context.SaveChangesAsync();
-        return Ok("User deleted successfully");
-    }
-
-    [Authorize]
-    [HttpDelete("me")]
-    public async Task<IActionResult> DeleteCurrentUser()
-    {
-        var email = User.FindFirstValue(ClaimTypes.Email);
-        if(string.IsNullOrEmpty(email))
-            return Unauthorized("Email claim missing");
-        await DeleteUser(email);
+        await _userService.DeleteUser(User.FindFirstValue(ClaimTypes.Email));
         return Ok("User deleted successfully");
     }
 }
