@@ -29,3 +29,7 @@ jobs:
       dockerfile_location: './DataConsumer/Dockerfile'
       docker_context: '.'  
       push_to_registry: 'true'
+
+  deploy_dataconsumer:
+    name: Deploy Data Consumer to Azure
+    uses: ./.github/workflows/.deploy-container-app.yml

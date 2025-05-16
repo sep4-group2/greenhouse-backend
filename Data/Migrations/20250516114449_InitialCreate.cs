@@ -112,24 +112,24 @@ namespace Data.Migrations
                 name: "NotificationUser",
                 columns: table => new
                 {
-                    NotificationsId = table.Column<int>(type: "int", nullable: false),
-                    Usersemail = table.Column<string>(type: "nvarchar(450)", nullable: false)
+                    NotificationId = table.Column<int>(type: "int", nullable: false),
+                    UserId = table.Column<string>(type: "nvarchar(450)", maxLength: 450, nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_NotificationUser", x => new { x.NotificationsId, x.Usersemail });
+                    table.PrimaryKey("PK_NotificationUser", x => new { x.NotificationId, x.UserId });
                     table.ForeignKey(
-                        name: "FK_NotificationUser_Notifications_NotificationsId",
-                        column: x => x.NotificationsId,
+                        name: "FK_NotificationUser_Notifications_NotificationId",
+                        column: x => x.NotificationId,
                         principalTable: "Notifications",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_NotificationUser_Users_Usersemail",
-                        column: x => x.Usersemail,
+                        name: "FK_NotificationUser_Users_UserId",
+                        column: x => x.UserId,
                         principalTable: "Users",
                         principalColumn: "email",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -226,9 +226,9 @@ namespace Data.Migrations
                 column: "GreenhouseId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_NotificationUser_Usersemail",
+                name: "IX_NotificationUser_UserId",
                 table: "NotificationUser",
-                column: "Usersemail");
+                column: "UserId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Presets_SystemPresetId",

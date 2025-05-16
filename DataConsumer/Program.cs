@@ -20,16 +20,7 @@ IConfiguration configuration = new ConfigurationBuilder()
     .AddEnvironmentVariables() // This allows overriding settings with environment variables
     .Build();
 
-// Now you can access settings
 var connectionString = configuration.GetConnectionString("DefaultConnection");
-var mqttHost = configuration["MQTT:Host"];
-var mqttPort = configuration["MQTT:Port"];
-
-Console.WriteLine($"Environment: {environment}");
-Console.WriteLine($"appsettings.{environment}.json");
-Console.WriteLine($"MQTT Host: {mqttHost}");
-Console.WriteLine($"MQTT Port: {mqttPort}");
-Console.WriteLine($"Connection String: {connectionString}");
 
 try
 {

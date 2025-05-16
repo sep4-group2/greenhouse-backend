@@ -198,15 +198,16 @@ namespace Data.Migrations
 
             modelBuilder.Entity("NotificationUser", b =>
                 {
-                    b.Property<int>("NotificationsId")
+                    b.Property<int>("NotificationId")
                         .HasColumnType("int");
 
-                    b.Property<string>("Usersemail")
+                    b.Property<string>("UserId")
+                        .HasMaxLength(450)
                         .HasColumnType("nvarchar(450)");
 
-                    b.HasKey("NotificationsId", "Usersemail");
+                    b.HasKey("NotificationId", "UserId");
 
-                    b.HasIndex("Usersemail");
+                    b.HasIndex("UserId");
 
                     b.ToTable("NotificationUser");
                 });
@@ -334,14 +335,14 @@ namespace Data.Migrations
                 {
                     b.HasOne("Notification", null)
                         .WithMany()
-                        .HasForeignKey("NotificationsId")
+                        .HasForeignKey("NotificationId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("Data.Entities.User", null)
                         .WithMany()
-                        .HasForeignKey("Usersemail")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
                 });
 
