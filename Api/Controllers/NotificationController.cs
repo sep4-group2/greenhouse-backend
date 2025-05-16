@@ -1,4 +1,6 @@
+using System.Security.Claims;
 using Api.DTOs;
+using Api.Middleware;
 using Api.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -22,6 +24,7 @@ public class NotificationController: ControllerBase
 
     
     //Endpoint for clients to fetch the public VAPID key needed to subscribe
+    [AuthenticateUser]
     [HttpGet("/public-key")]
     public async Task<IActionResult> GetPublicKey()
     {
@@ -38,8 +41,8 @@ public class NotificationController: ControllerBase
     }
     
     
-    //NEEDS AUTHORIZATION
     //Endpoint for saving a subscription
+    [AuthenticateUser]
     [HttpPost("save-subscription")]
     public async Task<IActionResult> SaveSubscription([FromBody] SaveSubscriptionRequestDTO subscription)
     {
@@ -47,7 +50,7 @@ public class NotificationController: ControllerBase
         {
             //Using jwt first get the user email
             //TO BE IMPLEMENTED
-            string email = "";
+            string email = User.FindFirstValue(ClaimTypes.Email);
 
             await _notificationService.SaveSubscription(
                 new SaveSubscriptionDTO()
