@@ -36,10 +36,18 @@ public class SimpleMqttClient
             await HandleMessage(topic, message);
         };
 
-            
-        _options = new MqttClientOptionsBuilder()
+
+        var builder = new MqttClientOptionsBuilder()
             .WithTcpServer(host, port)
-            .WithClientId($"DataConsumer_{Guid.NewGuid()}")
+            .WithClientId($"DataConsumer_{Guid.NewGuid()}");
+        
+        if (configuration["MQTT:Username"] != null && configuration["MQTT:Password"] != null)
+        {
+            builder.WithCredentials(configuration["MQTT:Username"], configuration["MQTT:Password"]);
+        }
+        
+        _options = builder
+            .WithCleanSession()
             .Build();
     }
 

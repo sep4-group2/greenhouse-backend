@@ -1,6 +1,5 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore.Migrations;
-using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
@@ -16,8 +15,8 @@ namespace Data.Migrations
                 name: "Users",
                 columns: table => new
                 {
-                    email = table.Column<string>(type: "text", nullable: false),
-                    Password = table.Column<string>(type: "text", nullable: false)
+                    email = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    Password = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -25,18 +24,34 @@ namespace Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Actions",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Type = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Status = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Timestamp = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    GreenhouseId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Actions", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Greenhouses",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Name = table.Column<string>(type: "text", nullable: false),
-                    IpAddress = table.Column<string>(type: "text", nullable: false),
-                    LightingMethod = table.Column<string>(type: "text", nullable: false),
-                    WateringMethod = table.Column<string>(type: "text", nullable: false),
-                    FertilizationMethod = table.Column<string>(type: "text", nullable: false),
-                    UserEmail = table.Column<string>(type: "text", nullable: false),
-                    ActivePresetId = table.Column<int>(type: "integer", nullable: true)
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    IpAddress = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    LightingMethod = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    WateringMethod = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    FertilizationMethod = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    UserEmail = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    ActivePresetId = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -53,11 +68,11 @@ namespace Data.Migrations
                 name: "Notifications",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Timestamp = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    Content = table.Column<string>(type: "text", nullable: false),
-                    GreenhouseId = table.Column<int>(type: "integer", nullable: false)
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Timestamp = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    Content = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    GreenhouseId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -74,13 +89,13 @@ namespace Data.Migrations
                 name: "SensorReadings",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Type = table.Column<string>(type: "text", nullable: false),
-                    Value = table.Column<double>(type: "double precision", nullable: false),
-                    Unit = table.Column<string>(type: "text", nullable: false),
-                    Timestamp = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    GreenhouseId = table.Column<int>(type: "integer", nullable: false)
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Type = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Value = table.Column<double>(type: "float", nullable: false),
+                    Unit = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Timestamp = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    GreenhouseId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -97,42 +112,42 @@ namespace Data.Migrations
                 name: "NotificationUser",
                 columns: table => new
                 {
-                    NotificationsId = table.Column<int>(type: "integer", nullable: false),
-                    Usersemail = table.Column<string>(type: "text", nullable: false)
+                    NotificationId = table.Column<int>(type: "int", nullable: false),
+                    UserId = table.Column<string>(type: "nvarchar(450)", maxLength: 450, nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_NotificationUser", x => new { x.NotificationsId, x.Usersemail });
+                    table.PrimaryKey("PK_NotificationUser", x => new { x.NotificationId, x.UserId });
                     table.ForeignKey(
-                        name: "FK_NotificationUser_Notifications_NotificationsId",
-                        column: x => x.NotificationsId,
+                        name: "FK_NotificationUser_Notifications_NotificationId",
+                        column: x => x.NotificationId,
                         principalTable: "Notifications",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_NotificationUser_Users_Usersemail",
-                        column: x => x.Usersemail,
+                        name: "FK_NotificationUser_Users_UserId",
+                        column: x => x.UserId,
                         principalTable: "Users",
                         principalColumn: "email",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
                 name: "Presets",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Name = table.Column<string>(type: "text", nullable: false),
-                    MinTemperature = table.Column<double>(type: "double precision", nullable: false),
-                    MaxTemperature = table.Column<double>(type: "double precision", nullable: false),
-                    MinAirHumidity = table.Column<double>(type: "double precision", nullable: false),
-                    MaxAirHumidity = table.Column<double>(type: "double precision", nullable: false),
-                    MinSoilHumidity = table.Column<double>(type: "double precision", nullable: false),
-                    MaxSoilHumidity = table.Column<double>(type: "double precision", nullable: false),
-                    HoursOfLight = table.Column<int>(type: "integer", nullable: false),
-                    SystemPresetId = table.Column<int>(type: "integer", nullable: false),
-                    UserPresetId = table.Column<int>(type: "integer", nullable: false)
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    MinTemperature = table.Column<double>(type: "float", nullable: false),
+                    MaxTemperature = table.Column<double>(type: "float", nullable: false),
+                    MinAirHumidity = table.Column<double>(type: "float", nullable: false),
+                    MaxAirHumidity = table.Column<double>(type: "float", nullable: false),
+                    MinSoilHumidity = table.Column<double>(type: "float", nullable: false),
+                    MaxSoilHumidity = table.Column<double>(type: "float", nullable: false),
+                    HoursOfLight = table.Column<int>(type: "int", nullable: false),
+                    SystemPresetId = table.Column<int>(type: "int", nullable: true),
+                    UserPresetId = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -143,7 +158,7 @@ namespace Data.Migrations
                 name: "SystemPresets",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "integer", nullable: false)
+                    Id = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -160,8 +175,8 @@ namespace Data.Migrations
                 name: "UserPresets",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "integer", nullable: false),
-                    UserEmail = table.Column<string>(type: "text", nullable: false)
+                    Id = table.Column<int>(type: "int", nullable: false),
+                    UserEmail = table.Column<string>(type: "nvarchar(450)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -180,6 +195,21 @@ namespace Data.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.InsertData(
+                table: "Presets",
+                columns: new[] { "Id", "HoursOfLight", "MaxAirHumidity", "MaxSoilHumidity", "MaxTemperature", "MinAirHumidity", "MinSoilHumidity", "MinTemperature", "Name", "SystemPresetId", "UserPresetId" },
+                values: new object[] { 1, 12, 60.0, 50.0, 25.0, 40.0, 30.0, 18.0, "Default System Preset", null, null });
+
+            migrationBuilder.InsertData(
+                table: "SystemPresets",
+                column: "Id",
+                value: 1);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Actions_GreenhouseId",
+                table: "Actions",
+                column: "GreenhouseId");
+
             migrationBuilder.CreateIndex(
                 name: "IX_Greenhouses_ActivePresetId",
                 table: "Greenhouses",
@@ -196,9 +226,9 @@ namespace Data.Migrations
                 column: "GreenhouseId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_NotificationUser_Usersemail",
+                name: "IX_NotificationUser_UserId",
                 table: "NotificationUser",
-                column: "Usersemail");
+                column: "UserId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Presets_SystemPresetId",
@@ -221,6 +251,14 @@ namespace Data.Migrations
                 column: "UserEmail");
 
             migrationBuilder.AddForeignKey(
+                name: "FK_Actions_Greenhouses_GreenhouseId",
+                table: "Actions",
+                column: "GreenhouseId",
+                principalTable: "Greenhouses",
+                principalColumn: "Id",
+                onDelete: ReferentialAction.Cascade);
+
+            migrationBuilder.AddForeignKey(
                 name: "FK_Greenhouses_Presets_ActivePresetId",
                 table: "Greenhouses",
                 column: "ActivePresetId",
@@ -233,16 +271,14 @@ namespace Data.Migrations
                 table: "Presets",
                 column: "SystemPresetId",
                 principalTable: "SystemPresets",
-                principalColumn: "Id",
-                onDelete: ReferentialAction.Cascade);
+                principalColumn: "Id");
 
             migrationBuilder.AddForeignKey(
                 name: "FK_Presets_UserPresets_UserPresetId",
                 table: "Presets",
                 column: "UserPresetId",
                 principalTable: "UserPresets",
-                principalColumn: "Id",
-                onDelete: ReferentialAction.Cascade);
+                principalColumn: "Id");
         }
 
         /// <inheritdoc />
@@ -255,6 +291,9 @@ namespace Data.Migrations
             migrationBuilder.DropForeignKey(
                 name: "FK_UserPresets_Presets_Id",
                 table: "UserPresets");
+
+            migrationBuilder.DropTable(
+                name: "Actions");
 
             migrationBuilder.DropTable(
                 name: "NotificationUser");

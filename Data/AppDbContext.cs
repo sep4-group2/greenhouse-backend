@@ -23,7 +23,7 @@ public class AppDbContext : DbContext
             .WithMany(u => u.UserPresets)
             .HasForeignKey(up => up.UserEmail);
 
-        // User-Greenhouse one-to-many
+        // User-Greenhouse one-to-many - KEEP CASCADE (default)
         modelBuilder.Entity<Greenhouse>()
             .HasOne(g => g.User)
             .WithMany(u => u.Greenhouses)
@@ -42,11 +42,35 @@ public class AppDbContext : DbContext
             .WithMany(g => g.SensorReadings)
             .HasForeignKey(sr => sr.GreenhouseId);
 
-        // Greenhouse-Notification one-to-many
+        // Greenhouse-Notification one-to-many - KEEP CASCADE (default)
         modelBuilder.Entity<Notification>()
             .HasOne(n => n.Greenhouse)
             .WithMany(g => g.Notifications)
             .HasForeignKey(n => n.GreenhouseId);
+
+        // Configure the many-to-many relationship between Notification and User
+        // DISABLE CASCADE from User to NotificationUser
+        modelBuilder.Entity<Notification>()
+            .HasMany(n => n.Users)
+            .WithMany(u => u.Notifications)
+            .UsingEntity<Dictionary<string, object>>(
+                "NotificationUser",
+                j => j.HasOne<User>()
+                      .WithMany()
+                      .HasForeignKey("UserId")
+                      .HasPrincipalKey(u => u.email)
+                      .OnDelete(DeleteBehavior.Restrict), // Prevent cascade from User
+                j => j.HasOne<Notification>()
+                      .WithMany()
+                      .HasForeignKey("NotificationId")
+                      .OnDelete(DeleteBehavior.Cascade)  // Allow cascade from Notification
+            );
+
+        // Fix the key length issue for the join table
+        modelBuilder.Entity("NotificationUser", entity =>
+        {
+            entity.Property("UserId").HasMaxLength(450); // Limit the email length
+        });
 
         // SystemPreset one-to-one with Preset
         modelBuilder.Entity<SystemPreset>()

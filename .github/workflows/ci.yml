@@ -1,0 +1,28 @@
+name: Continuous Integration
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build_and_test:
+    name: Build and Test
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '9.0.x'
+          
+      - name: Restore dependencies
+        run: dotnet restore greenhouse-backend.sln
+        
+      - name: Build solution
+        run: dotnet build greenhouse-backend.sln --no-restore --configuration Release
+        
+      - name: Run tests
+        run: dotnet test Tests/Tests.csproj --no-build --configuration Release --verbosity normal
