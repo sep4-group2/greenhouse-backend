@@ -52,7 +52,7 @@ public class AuthController : ControllerBase
         
         return Ok(new
         {
-            toke = newAccessToken,
+            token = newAccessToken,
             refreshToken = newRefreshToken
         });
     }
