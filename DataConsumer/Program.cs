@@ -4,21 +4,59 @@ using DataConsumer.Clients;
 using System.Threading;
 using Microsoft.EntityFrameworkCore;
 using Data;
+using Azure.Identity;
+using Azure.Security.KeyVault.Secrets;
 
 // Set up configuration
-var environment = Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT") ?? "Production";
+var environment = Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT") ?? "Release";
 var topics = new[]
 {
     "greenhouse/sensor",
     "greenhouse/action"
 };
 
-IConfiguration configuration = new ConfigurationBuilder()
+var configBuilder = new ConfigurationBuilder()
     .SetBasePath(Directory.GetCurrentDirectory())
     .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
     .AddJsonFile($"appsettings.{environment}.json", optional: true, reloadOnChange: true)
-    .AddEnvironmentVariables() // This allows overriding settings with environment variables
-    .Build();
+    .AddEnvironmentVariables(); // This allows overriding settings with environment variables
+
+// Only add KeyVault in Production/Release environment
+if (environment.Equals("Production", StringComparison.OrdinalIgnoreCase) || 
+    environment.Equals("Release", StringComparison.OrdinalIgnoreCase))
+{
+    Console.WriteLine("Running in Production/Release environment - configuring KeyVault...");
+    
+    // Build temporary configuration to get KeyVault settings
+    var tempConfig = configBuilder.Build();
+    
+    // Get KeyVault settings from configuration
+    var keyVaultName = tempConfig["KeyVault:Vault"];
+    var managedIdentityClientId = tempConfig["KeyVault:ManagedIdentityClientId"];
+    
+    if (!string.IsNullOrEmpty(keyVaultName))
+    {
+        var keyVaultUri = new Uri($"https://{keyVaultName}.vault.azure.net/");
+        var credential = new DefaultAzureCredential(new DefaultAzureCredentialOptions
+        {
+            ManagedIdentityClientId = managedIdentityClientId
+        });
+        
+        // Add KeyVault to the configuration sources
+        configBuilder.AddAzureKeyVault(keyVaultUri, credential);
+        Console.WriteLine($"KeyVault configuration added: {keyVaultUri}");
+    }
+    else
+    {
+        Console.WriteLine("KeyVault name not found in configuration.");
+    }
+}
+else
+{
+    Console.WriteLine($"Running in {environment} environment - KeyVault integration disabled.");
+}
+
+IConfiguration configuration = configBuilder.Build();
 
 var connectionString = configuration.GetConnectionString("DefaultConnection");
 

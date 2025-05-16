@@ -7,10 +7,10 @@ on:
       - feature/pipelines
   workflow_dispatch:
 
-
 permissions:
   contents: read
   packages: write
+  id-token: write  # Required for Azure authentication
 
 jobs:
   build_api:
@@ -32,4 +32,29 @@ jobs:
 
   deploy_dataconsumer:
     name: Deploy Data Consumer to Azure
-    uses: ./.github/workflows/.deploy-container-app.yml
+    needs: build_dataconsumer
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Azure login with managed identity
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      
+      - name: Deploy to Container App
+        uses: azure/CLI@v2
+        with:
+          inlineScript: |
+            az containerapp update \
+              --name gh-dataconsumer-app \
+              --resource-group green-house-rg \
+              --image ghcr.io/${{ github.repository_owner }}/greenhouse-dataconsumer:${{ github.sha }} \
+      
+      - name: Logout from Azure
+        run: |
+          az logout
