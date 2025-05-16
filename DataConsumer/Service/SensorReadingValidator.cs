@@ -1,5 +1,6 @@
 using Data;
 using Data.Entities;
+using Data.Utils;
 using Microsoft.EntityFrameworkCore;
 
 namespace DataConsumer.Services;
@@ -49,9 +50,9 @@ public class SensorReadingValidator
     {
         bool outOfRange = type switch
         {
-            "temperature" => reading.Value < preset.MinTemperature || reading.Value > preset.MaxTemperature,
-            "air humidity" => reading.Value < preset.MinAirHumidity || reading.Value > preset.MaxAirHumidity,
-            "soil humidity" => reading.Value < preset.MinSoilHumidity || reading.Value > preset.MaxSoilHumidity,
+            SensorReadingType.Temperature => reading.Value < preset.MinTemperature || reading.Value > preset.MaxTemperature,
+            SensorReadingType.AirHumidity => reading.Value < preset.MinAirHumidity || reading.Value > preset.MaxAirHumidity,
+            SensorReadingType.SoilHumidity => reading.Value < preset.MinSoilHumidity || reading.Value > preset.MaxSoilHumidity,
             _ => false
         };
         return outOfRange;
