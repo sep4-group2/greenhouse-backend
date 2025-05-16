@@ -72,13 +72,13 @@ try
     {
         // This will verify if we can connect to the database
         bool canConnect = dbContext.Database.CanConnect();
+            dbContext.Database.EnsureCreated();
         
         if (canConnect)
         {
             Console.WriteLine("Successfully connected to the database!");
             
             // Ensure database is created (this is optional and creates the database if it doesn't exist)
-            dbContext.Database.EnsureCreated();
             Console.WriteLine("Database exists or has been created.");
         }
         else
