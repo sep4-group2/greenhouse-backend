@@ -1,6 +1,6 @@
 namespace Api.DTOs;
 
-public class CurrentDataResultDTO
+public class PastSensorReadingResultDTO
 {
     public int Id { get; set; }
 
@@ -8,6 +8,4 @@ public class CurrentDataResultDTO
     public double Value { get; set; }
     public string Unit { get; set; }
     public DateTime Timestamp { get; set; }
-    public double MaxValue { get; set; }
-    public double MinValue { get; set; }
 }

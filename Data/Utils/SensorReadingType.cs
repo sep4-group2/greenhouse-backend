@@ -1,4 +1,4 @@
-namespace Data.Database.Utils;
+namespace Data.Utils;
 
 public static class SensorReadingType
 {
