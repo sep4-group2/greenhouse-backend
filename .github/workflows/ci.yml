@@ -32,11 +32,3 @@ jobs:
         
       - name: Run tests
         run: dotnet test Tests/Tests.csproj --no-build --configuration Release --verbosity normal
-        
-      - name: Upload test results
-        uses: actions/upload-artifact@v3
-        if: always()
-        with:
-          name: test-results
-          path: TestResults/
-          retention-days: 1
