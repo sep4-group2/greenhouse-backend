@@ -1,14 +1,45 @@
+
+using System.Text;
+using Data.Entities;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
+using Api.Services;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = builder.Configuration["Jwt:Issuer"],
+            ValidAudience = builder.Configuration["Jwt:Audience"],
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
+        };
+    });
+
+
 // Add services to the container.
+builder.Services.AddAuthorization();
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
+
+
+builder.Services.AddScoped<DataService>();
+builder.Services.AddScoped<AuthService>();
+builder.Services.AddScoped<UserService>();
+
 // Add database context
-builder.Services.AddDbContext<Data.Database.AppDbContext>(options =>
+builder.Services.AddDbContext<Data.AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 var app = builder.Build();
@@ -19,7 +50,7 @@ using (var scope = app.Services.CreateScope())
     var services = scope.ServiceProvider;
     try
     {
-        var dbContext = services.GetRequiredService<Data.Database.AppDbContext>();
+        var dbContext = services.GetRequiredService<Data.AppDbContext>();
         if (dbContext.Database.CanConnect())
         {
             app.Logger.LogInformation("Successfully connected to the database!");
@@ -37,6 +68,8 @@ using (var scope = app.Services.CreateScope())
         app.Logger.LogError(ex, "An error occurred while testing database connection.");
     }
 }
+
+
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment() || app.Environment.IsEnvironment("LocalDocker"))
