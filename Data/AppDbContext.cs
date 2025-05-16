@@ -28,6 +28,12 @@ public class AppDbContext : DbContext
             .HasOne(g => g.User)
             .WithMany(u => u.Greenhouses)
             .HasForeignKey(g => g.UserEmail);
+        
+        //User - Device one-to-many
+        modelBuilder.Entity<Device>()
+            .HasOne(d => d.User)
+            .WithMany(u => u.Devices)
+            .HasForeignKey(d => d.UserEmail);
 
         // Greenhouse-Preset one-to-many (ActivePreset)
         modelBuilder.Entity<Greenhouse>()
@@ -95,6 +101,7 @@ public class AppDbContext : DbContext
     public DbSet<Notification> Notifications { get; set; }
     
     public DbSet<Action> Actions { get; set; }
+    public DbSet<Device> Devices { get; set; }
 
 
  
