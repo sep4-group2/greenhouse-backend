@@ -36,7 +36,9 @@ builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
 
 
 
+builder.Services.AddScoped<ActionService>();
 builder.Services.AddScoped<SensorReadingsService>();
+
 // Add database context
 builder.Services.AddDbContext<Data.AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
