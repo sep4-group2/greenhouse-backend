@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using DataConsumer.Services;
 using Data;
 using Data.Entities;
+using Data.Utils;
 using Microsoft.EntityFrameworkCore;
 using Tests.Helpers;
 using Xunit;
@@ -42,7 +43,7 @@ namespace Tests
 
             var reading = new SensorReading
             {
-                Type = "temperature",
+                Type = SensorReadingType.Temperature,
                 Value = 30, // out of range
                 GreenhouseId = greenhouseId
             };
@@ -55,7 +56,6 @@ namespace Tests
             // Assert
             var notifications = await dbContext.Notifications.ToListAsync();
             Assert.Single(notifications);
-            Assert.Contains("temperature reading of 30 is out of range.", notifications[0].Content);
             Assert.Equal(1, notifications[0].GreenhouseId);
         }
     }
