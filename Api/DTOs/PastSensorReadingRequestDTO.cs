@@ -1,6 +1,8 @@
+using Data.Utils;
+
 namespace Api.DTOs;
 
-public class PastDataRequestDTO
+public class PastSensorReadingRequestDTO
 {
     public DateTime? BeforeDate {get; set;}
     private DateTime? _afterDate;
@@ -35,8 +37,8 @@ public class PastDataRequestDTO
         }
         set
         {
-            if (value == "temperature" || value == "air humidity" ||
-                value == "soil humidity")
+            if (value == SensorReadingType.Temperature || value == SensorReadingType.AirHumidity ||
+                value == SensorReadingType.SoilHumidity)
             {
                 _readingType = value;
             }

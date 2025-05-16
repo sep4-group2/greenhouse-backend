@@ -1,20 +1,20 @@
 using Api.Services;
+using Data.Database.Utils;
 using Data.Entities;
 using Tests.Helpers;
 
 namespace Tests
 {
-    public class SensorDataServiceTests
+    public class SensorReadingsServiceTests
     {
         [Fact]
-        public async Task GetCurrentDataAsync_ReturnsLatestSensorReadingsWithPresetBounds()
+        public async Task PrepareCurrentSensorReadingsAsync_ReturnsLatestSensorReadingsWithPresetBounds()
         {
             // Arrange
             var dbContext = TestDbHelper.GetInMemoryDbContext();
 
             var preset = new Preset
             {
-                Id = 1,
                 Name = "Test Preset",
                 MinTemperature = 10,
                 MaxTemperature = 30,
@@ -26,7 +26,6 @@ namespace Tests
 
             var greenhouse = new Greenhouse
             {
-                Id = 1,
                 Name = "GH Test",
                 IpAddress = "192.168.0.1",
                 LightingMethod = "LED",
@@ -38,40 +37,43 @@ namespace Tests
 
             dbContext.Presets.Add(preset);
             dbContext.Greenhouses.Add(greenhouse);
+            await dbContext.SaveChangesAsync();
+            var greenhouseId = greenhouse.Id;
+            
             dbContext.SensorReadings.AddRange(new[]
             {
                 new SensorReading
                 {
-                    Type = "temperature",
+                    Type = SensorReadingType.Temperature,
                     Value = 32,
                     Unit = "°C",
                     Timestamp = DateTime.UtcNow.AddMinutes(-1),
-                    GreenhouseId = 1
+                    GreenhouseId = greenhouseId
                 },
                 new SensorReading
                 {
-                    Type = "air humidity",
+                    Type = SensorReadingType.AirHumidity,
                     Value = 55,
                     Unit = "%",
                     Timestamp = DateTime.UtcNow.AddMinutes(-2),
-                    GreenhouseId = 1
+                    GreenhouseId = greenhouseId
                 },
                 new SensorReading
                 {
-                    Type = "soil humidity",
+                    Type = SensorReadingType.SoilHumidity,
                     Value = 42,
                     Unit = "%",
                     Timestamp = DateTime.UtcNow.AddMinutes(-3),
-                    GreenhouseId = 1
+                    GreenhouseId = greenhouseId
                 }
             });
 
             await dbContext.SaveChangesAsync();
 
-            var service = new DataService(dbContext);
+            var service = new SensorReadingsService(dbContext);
 
             // Act
-            var result = await service.GetCurrentDataAsync(greenhouse.Id);
+            var result = await service.PrepareCurrentSensorReadingsAsync(greenhouse.Id);
 
             // Assert
             Assert.NotNull(result);
