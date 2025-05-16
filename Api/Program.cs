@@ -35,9 +35,12 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
 
 
+builder.Services.AddScoped<AuthService>();
+builder.Services.AddScoped<UserService>();
 
 builder.Services.AddScoped<ActionService>();
 builder.Services.AddScoped<SensorReadingsService>();
+
 
 // Add database context
 builder.Services.AddDbContext<Data.AppDbContext>(options =>
