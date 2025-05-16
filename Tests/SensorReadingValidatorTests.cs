@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using DataConsumer.Services;
 using Data;
 using Data.Entities;
+using Data.Utils;
 using Microsoft.EntityFrameworkCore;
 using Tests.Helpers;
 using Xunit;
@@ -42,7 +43,7 @@ namespace Tests
 
             var reading = new SensorReading
             {
-                Type = "temperature",
+                Type = SensorReadingType.Temperature,
                 Value = 30, // out of range
                 GreenhouseId = greenhouseId
             };

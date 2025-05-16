@@ -1,13 +1,14 @@
 using Api.Services;
 using Data.Entities;
+using Data.Utils;
 using Tests.Helpers;
 
 namespace Tests
 {
-    public class DataServiceTests
+    public class SensorReadingsServiceTests
     {
         [Fact]
-        public async Task GetCurrentDataAsync_ReturnsLatestSensorReadingsWithPresetBounds()
+        public async Task PrepareCurrentSensorReadingsAsync_ReturnsLatestSensorReadingsWithPresetBounds()
         {
             // Arrange
             var dbContext = TestDbHelper.GetInMemoryDbContext();
@@ -43,7 +44,7 @@ namespace Tests
             {
                 new SensorReading
                 {
-                    Type = "temperature",
+                    Type = SensorReadingType.Temperature,
                     Value = 32,
                     Unit = "°C",
                     Timestamp = DateTime.UtcNow.AddMinutes(-1),
@@ -51,7 +52,7 @@ namespace Tests
                 },
                 new SensorReading
                 {
-                    Type = "air humidity",
+                    Type = SensorReadingType.AirHumidity,
                     Value = 55,
                     Unit = "%",
                     Timestamp = DateTime.UtcNow.AddMinutes(-2),
@@ -59,7 +60,7 @@ namespace Tests
                 },
                 new SensorReading
                 {
-                    Type = "soil humidity",
+                    Type = SensorReadingType.SoilHumidity,
                     Value = 42,
                     Unit = "%",
                     Timestamp = DateTime.UtcNow.AddMinutes(-3),
@@ -69,26 +70,26 @@ namespace Tests
 
             await dbContext.SaveChangesAsync();
 
-            var service = new DataService(dbContext);
+            var service = new SensorReadingsService(dbContext);
 
             // Act
-            var result = await service.GetCurrentDataAsync(greenhouse.Id);
+            var result = await service.PrepareCurrentSensorReadingsAsync(greenhouse.Id);
 
             // Assert
             Assert.NotNull(result);
             Assert.Equal(3, result.Count);
 
-            var temp = result.First(r => r.Type == "temperature");
+            var temp = result.First(r => r.Type == SensorReadingType.Temperature);
             Assert.Equal(32, temp.Value);
             Assert.Equal(10, temp.MinValue);
             Assert.Equal(30, temp.MaxValue);
 
-            var air = result.First(r => r.Type == "air humidity");
+            var air = result.First(r => r.Type == SensorReadingType.AirHumidity);
             Assert.Equal(55, air.Value);
             Assert.Equal(20, air.MinValue);
             Assert.Equal(70, air.MaxValue);
 
-            var soil = result.First(r => r.Type == "soil humidity");
+            var soil = result.First(r => r.Type == SensorReadingType.SoilHumidity);
             Assert.Equal(42, soil.Value);
             Assert.Equal(30, soil.MinValue);
             Assert.Equal(80, soil.MaxValue);

@@ -1,8 +1,8 @@
-using Data.Database.Utils;
+using Data.Utils;
 
 namespace Api.DTOs;
 
-public class PastDataRequestDTO
+public class PastSensorReadingRequestDTO
 {
     public DateTime? BeforeDate {get; set;}
     private DateTime? _afterDate;
