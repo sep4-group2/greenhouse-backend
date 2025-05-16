@@ -1,10 +1,12 @@
-name: Continous Deployment
+name: Continuous Deployment
 
 on:
-  push:
+  workflow_run:
+    workflows: ["Continuous Integration"]
+    types:
+      - completed
     branches:
       - main
-      - feature/pipelines
   workflow_dispatch:
 
 permissions:
@@ -13,7 +15,15 @@ permissions:
   id-token: write  # Required for Azure authentication
 
 jobs:
+  # Check if CI was successful
+  check_ci_status:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name == 'workflow_dispatch' }}
+    steps:
+      - run: echo "CI passed, proceeding with deployment"
+
   build_api:
+    needs: check_ci_status
     uses: ./.github/workflows/.build-docker-image.yml
     with:
       image_name: 'greenhouse-api'
@@ -21,7 +31,9 @@ jobs:
       dockerfile_location: './Api/Dockerfile'
       docker_context: '.'  
       push_to_registry: 'true'
+
   build_dataconsumer:
+    needs: check_ci_status
     uses: ./.github/workflows/.build-docker-image.yml
     with:
       image_name: 'greenhouse-dataconsumer'
