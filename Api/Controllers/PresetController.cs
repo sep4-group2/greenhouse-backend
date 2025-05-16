@@ -1,79 +1,57 @@
-using Data;
+using Api.Services;
 using Data.Entities;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 [ApiController]
 [Route("api/[controller]")]
 public class PresetController : ControllerBase
 {
-    private readonly AppDbContext _context;
+    private readonly PresetService _presetService;
 
-    public PresetController(AppDbContext context)
+    public PresetController(PresetService presetService)
     {
-        _context = context;
+        _presetService = presetService;
     }
 
-    // Create a new preset
     [HttpPost]
     public async Task<IActionResult> CreatePreset([FromBody] Preset preset)
     {
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
 
-        _context.Presets.Add(preset);
-        await _context.SaveChangesAsync();
-        return CreatedAtAction(nameof(GetPreset), new { id = preset.Id }, preset);
+        var created = await _presetService.CreatePresetAsync(preset);
+        return CreatedAtAction(nameof(GetPreset), new { id = created.Id }, created);
     }
 
-    // Get a preset by ID
     [HttpGet("{id}")]
     public async Task<IActionResult> GetPreset(int id)
     {
-        var preset = await _context.Presets.FindAsync(id);
+        var preset = await _presetService.GetPresetAsync(id);
         if (preset == null)
             return NotFound();
 
         return Ok(preset);
     }
 
-    // Update an existing preset
     [HttpPut("{id}")]
     public async Task<IActionResult> UpdatePreset(int id, [FromBody] Preset preset)
     {
-        if (id != preset.Id)
-            return BadRequest();
-
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
 
-        _context.Entry(preset).State = EntityState.Modified;
-
-        try
-        {
-            await _context.SaveChangesAsync();
-        }
-        catch (DbUpdateConcurrencyException)
-        {
-            if (!_context.Presets.Any(p => p.Id == id))
-                return NotFound();
-
-            throw;
-        }
+        var updated = await _presetService.UpdatePresetAsync(id, preset);
+        if (!updated)
+            return NotFound();
 
         return NoContent();
     }
 
-    // Delete a preset
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeletePreset(int id)
     {
-        var preset = await _context.Presets.FindAsync(id);
-        if (preset == null)
+        var deleted = await _presetService.DeletePresetAsync(id);
+        if (!deleted)
             return NotFound();
-
-        _context.Presets.Remove(preset);
-        await _context.SaveChangesAsync();
 
         return NoContent();
     }
