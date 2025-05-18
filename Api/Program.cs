@@ -37,6 +37,7 @@ builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
 builder.Services.AddScoped<DataService>();
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<UserService>();
+builder.Services.AddScoped<GreenhouseService>();
 
 // Add database context
 builder.Services.AddDbContext<Data.AppDbContext>(options =>
