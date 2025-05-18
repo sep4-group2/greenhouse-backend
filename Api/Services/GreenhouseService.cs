@@ -22,27 +22,32 @@ public class GreenhouseService(AppDbContext dbContext)
     {
         if (string.IsNullOrEmpty(email))
             throw new UnauthorizedAccessException("Email claim missing");
-        bool alreadyPaired = await dbContext.Greenhouses.AnyAsync(g => g.IpAddress == greenhousedto.MacAddress && g.UserEmail != null);
-        if (alreadyPaired)
-            throw new UnauthorizedAccessException("This Greenhouse has already paired");
-        
-        var user = await dbContext.Users.Include(u => u.Greenhouses).FirstOrDefaultAsync(u => u.email == email);
+        var user = await dbContext.Users.FirstOrDefaultAsync(u => u.email == email);
         if(user == null)
             throw new UnauthorizedAccessException("User not found");
-        Greenhouse greenhouse = new Greenhouse
+        var greenhouse = await dbContext.Greenhouses.FirstOrDefaultAsync(g => g.IpAddress == greenhousedto.MacAddress);
+        if(greenhouse == null)
         {
-            Name = greenhousedto.Name,
-            IpAddress = greenhousedto.MacAddress,
-            UserEmail = email,
-            LightingMethod = "Automatic",
-            WateringMethod = "Automatic",
-            FertilizationMethod = "Automatic",
-        };
+            greenhouse = new Greenhouse
+            {
+                Name = greenhousedto.Name,
+                IpAddress = greenhousedto.MacAddress,
+                UserEmail = email,
+                LightingMethod = "Automatic",
+                WateringMethod = "Automatic",
+                FertilizationMethod = "Automatic",
+            };
+        }
+        else if (greenhouse.UserEmail != null)
+            throw new UnauthorizedAccessException("This Greenhouse has already paired");
+        else
+            greenhouse.UserEmail = email;
+        
         dbContext.Greenhouses.Add(greenhouse);
         await dbContext.SaveChangesAsync();
     }
 
-    public async Task unpairGreenhouse(int id, string email)
+    public async Task UnpairGreenhouse(int id, string email)
     {
         if(string.IsNullOrEmpty(email))
             throw new UnauthorizedAccessException("Email claim missing");

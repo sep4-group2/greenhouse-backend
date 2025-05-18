@@ -31,7 +31,7 @@ public class GreenhouseController : ControllerBase
     public async Task<ActionResult> UnpairGreenhouse([FromBody]int id)
     {
         var email = User.FindFirstValue(ClaimTypes.Email);
-        await _greenhouseService.unpairGreenhouse(id, email);
+        await _greenhouseService.UnpairGreenhouse(id, email);
         return Ok($"Greenhouse with Id: {id} has been unpaired from {email}");
     }
 
