@@ -1,6 +1,4 @@
-﻿using System.Security.Claims;
-using Data;
-using Data.Entities;
+﻿using Data;
 using Microsoft.EntityFrameworkCore;
 
 namespace Api.Services;
