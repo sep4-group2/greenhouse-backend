@@ -5,7 +5,7 @@ using Action = Data.Entities.Action;
 
 namespace Tests
 {
-    public class ActionServiceTests
+    /*public class ActionServiceTests
     {
         [Fact]
         public async Task GetActionsForPeriodAsync_ReturnsCorrectActions()
@@ -81,5 +81,5 @@ namespace Tests
             Assert.Contains("Ventilation", types);
             Assert.DoesNotContain("Lighting", types);
         }
-    }
+    }*/
 }

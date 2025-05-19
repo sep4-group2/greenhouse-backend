@@ -1,10 +1,12 @@
+using System.Text.Json;
+using Api.Clients;
 using Data;
 using Api.DTOs;
 using Microsoft.EntityFrameworkCore;
 
 namespace Api.Services;
 
-public class ActionService(AppDbContext context)
+public class ActionService(AppDbContext context, MqttClient mqttClient)
 {
     public async Task<List<ActionResultDTO>> PrepareActionsForPeriodAsync(int greenhouseId, DateTime start, DateTime end)
     {
@@ -21,5 +23,27 @@ public class ActionService(AppDbContext context)
             .ToListAsync();
 
         return actions;
+    }
+
+    public async Task TriggerAction(string userEmail, int greenhouseId, string actionType)
+    {
+        var user = await context.Users.Include(g => g.Greenhouses).FirstOrDefaultAsync(u => u.email == userEmail);
+        if(user == null)
+            throw new UnauthorizedAccessException("User not found");
+        var greenhouse = user.Greenhouses.FirstOrDefault(g => g.Id == greenhouseId);
+        if(greenhouse == null)
+            throw new UnauthorizedAccessException("Greenhouse not found or not linked with this user");
+
+        var mqttPayload = new
+        {
+            macAddress = greenhouse.IpAddress,
+            action = actionType
+        };
+        var payloadJson = JsonSerializer.Serialize(mqttPayload);
+
+        await mqttClient.PublishMessage(
+            topic: $"greenhouse/{greenhouse.IpAddress}/{actionType}",
+            payload: payloadJson
+        );
     }
 }
