@@ -22,4 +22,9 @@ public class ActionService(AppDbContext context)
 
         return actions;
     }
+    public async Task SaveActionAsync(Data.Entities.Action action)
+    {
+        context.Actions.Add(action);
+        await context.SaveChangesAsync();
+    }
 }

@@ -33,4 +33,28 @@ public class ActionController : ControllerBase
             return StatusCode(500, "Internal server error");
         }
     }
+    [HttpPost("{greenhouseId}/actions")]
+    public async Task<IActionResult> SaveActionAsync(
+        [FromRoute] int greenhouseId,
+        [FromBody] ActionCreateDTO actionDto)
+    {
+        try
+        {
+            var action = new Data.Entities.Action
+            {
+                Type = actionDto.Type,
+                Status = actionDto.Status,
+                Timestamp = DateTime.UtcNow,
+                GreenhouseId = greenhouseId
+            };
+
+            await _service.SaveActionAsync(action);
+            return Ok();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError($"Error saving action for greenhouse {greenhouseId}: {ex.Message}");
+            return StatusCode(500, "Internal server error");
+        }
+    }
 }
