@@ -8,4 +8,5 @@ public class SendNotificationDTO
     public string userEmail { get; set; }
     [Required]
     public NotificationDTO notification { get; set; }
+    public int GreenhouseId { get; set; }
 }

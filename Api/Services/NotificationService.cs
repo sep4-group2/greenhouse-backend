@@ -60,6 +60,14 @@ public class NotificationService: INotificationService
                     JsonSerializer.Serialize(notification.notification);
                 await client.SendNotificationAsync(subscription, message,
                     options);
+                
+                //Save notification in the database
+                await SaveNotification(new SaveNotificationDTO()
+                {
+                    Content = message,
+                    GreenhouseId = notification.GreenhouseId,
+                    Timestamp = DateTime.Now
+                });
             }
             catch (Exception e)
             {
@@ -67,5 +75,17 @@ public class NotificationService: INotificationService
             }
         }
         
+    }
+    
+    //Method to save any outgoing notifications to the database, so that the client can access them, even if it doesn't reach them
+    public async Task SaveNotification(SaveNotificationDTO notification)
+    {
+        await _ctx.Notifications.AddAsync(new Notification()
+        {
+            Content = notification.Content,
+            GreenhouseId = notification.GreenhouseId,
+            Timestamp = notification.Timestamp
+        });
+        await _ctx.SaveChangesAsync();
     }
 }

@@ -7,4 +7,5 @@ public interface INotificationService
     public Task<VAPIDKeyDTO> GetPublicKey();
     public Task SaveSubscription(SaveSubscriptionDTO subscription);
     public Task SendNotification(SendNotificationDTO notification);
+    public Task SaveNotification(SaveNotificationDTO notification);
 }
