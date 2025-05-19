@@ -1,5 +1,7 @@
 using Api.Services;
 using Data.Entities;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using Tests.Helpers;
 using Xunit;
 
@@ -49,8 +51,9 @@ public class NotificationServiceTests
         );
 
         await dbContext.SaveChangesAsync();
-
-        var service = new NotificationService(dbContext);
+        
+        //Had to add some stuff because of the constructor
+        var service = new NotificationService(new ConfigurationManager(), dbContext, new Logger<NotificationService>(new LoggerFactory()));
 
         // Act
         var result = await service.GetNotificationsForPeriodAsync(
