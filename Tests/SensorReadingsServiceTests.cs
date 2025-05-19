@@ -79,17 +79,17 @@ namespace Tests
             Assert.NotNull(result);
             Assert.Equal(3, result.Count);
 
-            var temp = result.First(r => r.Type == SensorReadingType.Temperature);
+            var temp = result.First(r => r.Type == "temperature");
             Assert.Equal(32, temp.Value);
             Assert.Equal(10, temp.MinValue);
             Assert.Equal(30, temp.MaxValue);
 
-            var air = result.First(r => r.Type == SensorReadingType.AirHumidity);
+            var air = result.First(r => r.Type == "air humidity");
             Assert.Equal(55, air.Value);
             Assert.Equal(20, air.MinValue);
             Assert.Equal(70, air.MaxValue);
 
-            var soil = result.First(r => r.Type == SensorReadingType.SoilHumidity);
+            var soil = result.First(r => r.Type == "soil humidity");
             Assert.Equal(42, soil.Value);
             Assert.Equal(30, soil.MinValue);
             Assert.Equal(80, soil.MaxValue);

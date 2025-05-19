@@ -4,6 +4,7 @@ using Data.Entities;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Api.Services;
+using Azure.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 
@@ -35,15 +36,23 @@ builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
 
 
 builder.Services.AddScoped<INotificationService, NotificationService>();
+builder.Services.AddScoped<AuthService>();
+builder.Services.AddScoped<UserService>();
+builder.Services.AddScoped<GreenhouseService>();
 
+builder.Services.AddScoped<ActionService>();
 builder.Services.AddScoped<SensorReadingsService>();
+
+
 // Add database context
 builder.Services.AddDbContext<Data.AppDbContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 var app = builder.Build();
 
-// Test database connection
+// write line database connection string
+Console.WriteLine($"Database connection string: {builder.Configuration.GetConnectionString("DefaultConnection")}");
+
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
@@ -68,14 +77,8 @@ using (var scope = app.Services.CreateScope())
     }
 }
 
-
-
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment() || app.Environment.IsEnvironment("LocalDocker"))
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+app.UseSwagger();
+app.UseSwaggerUI();
 
 app.UseHttpsRedirection();
 
