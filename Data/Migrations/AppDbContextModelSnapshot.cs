@@ -51,6 +51,37 @@ namespace Data.Migrations
                     b.ToTable("Actions");
                 });
 
+            modelBuilder.Entity("Data.Entities.Device", b =>
+                {
+                    b.Property<int>("DeviceId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("DeviceId"));
+
+                    b.Property<string>("Auth")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Endpoint")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("P256dh")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("UserEmail")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("DeviceId");
+
+                    b.HasIndex("UserEmail");
+
+                    b.ToTable("Devices");
+                });
+
             modelBuilder.Entity("Data.Entities.Greenhouse", b =>
                 {
                     b.Property<int>("Id")
@@ -286,6 +317,17 @@ namespace Data.Migrations
                     b.Navigation("Greenhouse");
                 });
 
+            modelBuilder.Entity("Data.Entities.Device", b =>
+                {
+                    b.HasOne("Data.Entities.User", "User")
+                        .WithMany("Devices")
+                        .HasForeignKey("UserEmail")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("Data.Entities.Greenhouse", b =>
                 {
                     b.HasOne("Data.Entities.Preset", "ActivePreset")
@@ -402,6 +444,8 @@ namespace Data.Migrations
 
             modelBuilder.Entity("Data.Entities.User", b =>
                 {
+                    b.Navigation("Devices");
+
                     b.Navigation("Greenhouses");
 
                     b.Navigation("UserPresets");

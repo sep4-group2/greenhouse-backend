@@ -18,10 +18,6 @@ public class NotificationController: ControllerBase
         _notificationService = notificationService;
         _logger = logger;
     }
-    //Two endpoints needed 
-    //One for fetching the public VAPID key
-    //One for saving subscriptions
-
     
     //Endpoint for clients to fetch the public VAPID key needed to subscribe
     [AuthenticateUser]
@@ -49,9 +45,15 @@ public class NotificationController: ControllerBase
         try
         {
             //Using jwt first get the user email
-            //TO BE IMPLEMENTED
             string email = User.FindFirstValue(ClaimTypes.Email);
 
+            //Check if the user has an email
+            if (email == null)
+            {
+                return Unauthorized();
+            }
+
+            //If they do, create the subscription and save it
             await _notificationService.SaveSubscription(
                 new SaveSubscriptionDTO()
                 {
