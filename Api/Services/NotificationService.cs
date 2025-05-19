@@ -26,6 +26,7 @@ public class NotificationService: INotificationService
         };
     }
 
+    //Saves a subscription connected to a user in the database
     public async Task SaveSubscription(SaveSubscriptionDTO subscription)
     {
         await _ctx.Devices.AddAsync(new Device()
@@ -40,7 +41,10 @@ public class NotificationService: INotificationService
 
     public async Task SendNotification(SendNotificationDTO notification)
     {
+        //Get all devices connected to the user
         List<Device> devices = _ctx.Devices.Where(d => d.UserEmail == notification.userEmail).ToList();
+        
+        //Go through subscriptions and send the notifications
         foreach (Device device in devices)
         {
             //Create a subscription for each device connected to the user
