@@ -12,8 +12,9 @@ public class NotificationService: INotificationService
     private readonly IConfiguration _configuration;
     private readonly AppDbContext _ctx;
     private readonly ILogger<NotificationService> _logger;
-    public NotificationService(IConfiguration configuration, AppDbContext ctx)
+    public NotificationService(IConfiguration configuration, AppDbContext ctx, ILogger<NotificationService> logger)
     {
+        _logger = logger;
         _configuration = configuration;
         _ctx = ctx;
     }

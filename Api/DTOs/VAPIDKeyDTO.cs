@@ -2,5 +2,5 @@ namespace Api.DTOs;
 
 public class VAPIDKeyDTO
 {
-    public string publicKey;
+    public string publicKey { get; set; }
 }
