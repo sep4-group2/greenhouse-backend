@@ -3,6 +3,7 @@ using Api.DTOs;
 using Data;
 using Data.Entities;
 using WebPush;
+using Microsoft.EntityFrameworkCore;
 
 namespace Api.Services;
 
@@ -87,5 +88,22 @@ public class NotificationService: INotificationService
             Timestamp = notification.Timestamp
         });
         await _ctx.SaveChangesAsync();
+    }
+    
+    public async Task<List<NotificationResultDTO>> GetNotificationsForPeriodAsync(int greenhouseId, DateTime start, DateTime end)
+    {
+        var notifications = await _ctx.Notifications
+            .Where(n => n.GreenhouseId == greenhouseId &&
+                        n.Timestamp >= start &&
+                        n.Timestamp <= end)
+            .Select(n => new NotificationResultDTO
+            {
+                Id = n.Id,
+                Timestamp = n.Timestamp,
+                Content = n.Content
+            })
+            .ToListAsync();
+
+        return notifications;
     }
 }

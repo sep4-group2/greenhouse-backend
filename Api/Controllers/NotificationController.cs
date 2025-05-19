@@ -10,8 +10,8 @@ namespace Api.Controllers;
 [Route("api/[controller]")]
 public class NotificationController: ControllerBase
 {
-    INotificationService _notificationService;
-    ILogger<NotificationController> _logger;
+    private readonly INotificationService _notificationService;
+    private readonly ILogger<NotificationController> _logger;
 
     public NotificationController(INotificationService notificationService, ILogger<NotificationController> logger)
     {
@@ -68,6 +68,23 @@ public class NotificationController: ControllerBase
         {
             _logger.LogError($"Something went wrong while trying to save the subscription: {e.Message}");
             return StatusCode(500);
+        }
+    }
+    
+    [HttpPost("{greenhouseId}/past-notifications")]
+    public async Task<IActionResult> GetNotificationHistoryAsync(
+        [FromRoute] int greenhouseId, 
+        [FromBody] NotificationQueryDTO query)
+    {
+        try
+        {
+            var notifications = await _notificationService.GetNotificationsForPeriodAsync(greenhouseId, query.StartDate, query.EndDate);
+            return Ok(notifications);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError($"Error fetching notifications for greenhouse {greenhouseId}: {ex.Message}");
+            return StatusCode(500, "Internal server error");
         }
     }
 }
