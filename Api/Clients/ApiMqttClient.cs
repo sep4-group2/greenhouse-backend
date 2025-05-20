@@ -78,8 +78,12 @@ public class ApiMqttClient
             await ConnectAndKeepAlive();
         }
 
-        var message = new MqttApplicationMessageBuilder().WithTopic(topic).WithPayload(Encoding.UTF8.GetBytes(payload)).Build();
+        var messageBuilder = new MqttApplicationMessageBuilder().WithTopic(topic);
 
+        if (!string.IsNullOrEmpty(payload))
+            messageBuilder.WithPayload(Encoding.UTF8.GetBytes(payload));
+        
+        var message = messageBuilder.Build();
         await _client.PublishAsync(message);
         Console.WriteLine($"Published message to topic '{topic}': {payload}");
     }

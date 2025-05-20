@@ -17,7 +17,7 @@ public class ActionService (AppDbContext context)
                 throw new JsonException("Failed to deserialize action message.");
             }
             var greenhouse = await context.Greenhouses
-                .FirstOrDefaultAsync(g => g.IpAddress == actionMessageDto.MacAddress);
+                .FirstOrDefaultAsync(g => g.MacAddress == actionMessageDto.MacAddress);
             var action = new Data.Entities.Action
             {
                 Type = actionMessageDto.Command,

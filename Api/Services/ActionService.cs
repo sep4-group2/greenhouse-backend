@@ -34,16 +34,9 @@ public class ActionService(AppDbContext context, ApiMqttClient apiMqttClient)
         if(greenhouse == null)
             throw new UnauthorizedAccessException("Greenhouse not found or not linked with this user");
 
-        var mqttPayload = new
-        {
-            macAddress = greenhouse.IpAddress,
-            action = actionType
-        };
-        var payloadJson = JsonSerializer.Serialize(mqttPayload);
-
         await apiMqttClient.PublishMessage(
-            topic: $"greenhouse/{greenhouse.IpAddress}/{actionType}",
-            payload: payloadJson
+            topic: $"greenhouse/{greenhouse.MacAddress}/{actionType}",
+            payload: null
         );
     }
 }
