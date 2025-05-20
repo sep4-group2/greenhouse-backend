@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Api.Services;
 
-public class ActionService(AppDbContext context, MqttClient mqttClient)
+public class ActionService(AppDbContext context, ApiMqttClient apiMqttClient)
 {
     public async Task<List<ActionResultDTO>> PrepareActionsForPeriodAsync(int greenhouseId, DateTime start, DateTime end)
     {
@@ -41,7 +41,7 @@ public class ActionService(AppDbContext context, MqttClient mqttClient)
         };
         var payloadJson = JsonSerializer.Serialize(mqttPayload);
 
-        await mqttClient.PublishMessage(
+        await apiMqttClient.PublishMessage(
             topic: $"greenhouse/{greenhouse.IpAddress}/{actionType}",
             payload: payloadJson
         );

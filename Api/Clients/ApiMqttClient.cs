@@ -9,12 +9,12 @@ using MQTTnet;
 
 namespace Api.Clients;
 
-public class MqttClient
+public class ApiMqttClient
 {
       private readonly IMqttClient _client;
     private readonly MqttClientOptions _options;
 
-    public MqttClient(IConfiguration configuration)
+    public ApiMqttClient(IConfiguration configuration)
     {
         var host = configuration["MQTT:Host"] ?? "localhost";
         var port = int.Parse(configuration["MQTT:Port"] ?? "1883");
