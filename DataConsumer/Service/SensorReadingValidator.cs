@@ -33,7 +33,7 @@ public class SensorReadingValidator
 
         Console.WriteLine($"Out-of-range reading detected: {reading.Type} = {reading.Value}");
 
-        
+
         //TODO should be passed to notification server
         var notification = new Notification
         {
@@ -50,9 +50,12 @@ public class SensorReadingValidator
     {
         bool outOfRange = type switch
         {
-            SensorReadingType.Temperature => reading.Value < preset.MinTemperature || reading.Value > preset.MaxTemperature,
-            SensorReadingType.AirHumidity => reading.Value < preset.MinAirHumidity || reading.Value > preset.MaxAirHumidity,
-            SensorReadingType.SoilHumidity => reading.Value < preset.MinSoilHumidity || reading.Value > preset.MaxSoilHumidity,
+            SensorReadingType.Temperature => reading.Value < preset.MinTemperature ||
+                                             reading.Value > preset.MaxTemperature,
+            SensorReadingType.AirHumidity => reading.Value < preset.MinAirHumidity ||
+                                             reading.Value > preset.MaxAirHumidity,
+            SensorReadingType.SoilHumidity => reading.Value < preset.MinSoilHumidity ||
+                                              reading.Value > preset.MaxSoilHumidity,
             _ => false
         };
         return outOfRange;

@@ -14,7 +14,7 @@ public class NotificationServiceTests
         var greenhouse = new Greenhouse
         {
             Name = "GH1",
-            IpAddress = "192.168.0.10",
+            MacAddress = "192.168.0.10",
             LightingMethod = "LED",
             WateringMethod = "Auto",
             FertilizationMethod = "Auto",
