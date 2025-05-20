@@ -1,4 +1,3 @@
-
 using System.Text;
 using Data.Entities;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -43,6 +42,16 @@ builder.Services.AddScoped<GreenhouseService>();
 builder.Services.AddScoped<ActionService>();
 builder.Services.AddScoped<SensorReadingsService>();
 
+// Add CORS policy
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll", policy =>
+    {
+        policy.AllowAnyOrigin()
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
+});
 
 // Add database context
 builder.Services.AddDbContext<Data.AppDbContext>(options =>
@@ -80,6 +89,9 @@ app.UseSwagger();
 app.UseSwaggerUI();
 
 app.UseHttpsRedirection();
+
+// Use CORS before authorization
+app.UseCors("AllowAll");
 
 app.UseAuthorization();
 

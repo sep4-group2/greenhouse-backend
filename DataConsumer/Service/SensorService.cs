@@ -1,7 +1,10 @@
 using System.Text.Json;
 using Data;
+using DataConsumer.DTOs;
+using DataConsumer.Services;
+using Microsoft.EntityFrameworkCore;
 
-namespace DataConsumer.Services;
+namespace DataConsumer.Service;
 
 public class SensorService(AppDbContext dbContext, SensorReadingValidator validator)
 {
@@ -9,26 +12,49 @@ public class SensorService(AppDbContext dbContext, SensorReadingValidator valida
     {
         try
         {
-            var sensorData = JsonSerializer.Deserialize<SensorReading>(message);
-            var data = new SensorReading()
+            var sensorDataDto = JsonSerializer.Deserialize<SensorReadingMessageDto>(message);
+
+            if (sensorDataDto == null)
             {
-                Type = sensorData.Type,
-                Value = sensorData.Value,
-                Unit = sensorData.Unit,
-                Timestamp = sensorData.Timestamp,
-                GreenhouseId = sensorData.GreenhouseId,
-                Greenhouse = sensorData.Greenhouse
-            };
-            //edit the data based on what is actually coming through
+                throw new JsonException("Failed to deserialize sensor data message.");
+            }
+
+            var greenhouse = await dbContext.Greenhouses
+                .FirstAsync(g => g.MacAddress == sensorDataDto.MacAddress);
+
+            foreach (var sensorData in sensorDataDto.SensorData)
+            {
+                var data = new SensorReading
+                {
+                    Type = sensorData.Type,
+                    Value = sensorData.Value,
+                    Unit = sensorData.Unit,
+                    Timestamp = sensorData.Timestamp,
+                    GreenhouseId = greenhouse.Id
+                };
+                dbContext.SensorReadings.Add(data);
+                await dbContext.SaveChangesAsync();
+                await validator.ValidateAndTriggerAsync(data);
+            }
             
-            dbContext.SensorReadings.Add(data);
-            await dbContext.SaveChangesAsync();
-            await validator.ValidateAndTriggerAsync(data);
+            Console.WriteLine("Sensor data validated");
         }
         catch (JsonException e)
         {
             Console.WriteLine($"Failed to parse message: {e.Message}");
+        } 
+        catch (DbUpdateException e)
+        {
+            Console.WriteLine($"Failed to save sensor data: {e.Message}");
+        }
+        catch (InvalidOperationException e)
+        {
+            Console.WriteLine($"Greenhouse not found: {e.Message}");
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine($"An unexpected error occurred: {e.Message}");
         }
     }
-
+    
 }

@@ -18,41 +18,42 @@ public class GreenhouseService(AppDbContext dbContext)
         greenhouse.ActivePreset = preset;
         return greenhouse;
     }
+
     public async Task PairGreenhouse(GreenhousePairDto greenhousedto, string email)
     {
         if (string.IsNullOrEmpty(email))
             throw new UnauthorizedAccessException("Email claim missing");
         var user = await dbContext.Users.FirstOrDefaultAsync(u => u.email == email);
-        if(user == null)
+        if (user == null)
             throw new UnauthorizedAccessException("User not found");
-        var greenhouse = await dbContext.Greenhouses.FirstOrDefaultAsync(g => g.IpAddress == greenhousedto.MacAddress);
-        if(greenhouse == null)
+        var greenhouse = await dbContext.Greenhouses.FirstOrDefaultAsync(g => g.MacAddress == greenhousedto.MacAddress);
+        if (greenhouse == null)
         {
             greenhouse = new Greenhouse
             {
                 Name = greenhousedto.Name,
-                IpAddress = greenhousedto.MacAddress,
+                MacAddress = greenhousedto.MacAddress,
                 UserEmail = email,
-                LightingMethod = "Automatic",
-                WateringMethod = "Automatic",
-                FertilizationMethod = "Automatic",
+                LightingMethod = "manual",
+                WateringMethod = "manual",
+                FertilizationMethod = "manual",
             };
         }
         else if (greenhouse.UserEmail != null)
             throw new UnauthorizedAccessException("This Greenhouse has already paired");
         else
             greenhouse.UserEmail = email;
-        
+
         dbContext.Greenhouses.Add(greenhouse);
         await dbContext.SaveChangesAsync();
     }
 
     public async Task UnpairGreenhouse(int id, string email)
     {
-        if(string.IsNullOrEmpty(email))
+        if (string.IsNullOrEmpty(email))
             throw new UnauthorizedAccessException("Email claim missing");
         var greenhouse = await dbContext.Greenhouses.FirstOrDefaultAsync(g => g.Id == id);
-        if(greenhouse == null)
+        if (greenhouse == null)
             throw new UnauthorizedAccessException("Greenhouse not found or not paired with this user");
         greenhouse.UserEmail = null;
         greenhouse.User = null;
@@ -65,11 +66,10 @@ public class GreenhouseService(AppDbContext dbContext)
         if (string.IsNullOrEmpty(email))
             throw new UnauthorizedAccessException("Email claim missing");
         var greenhouse = await dbContext.Greenhouses.FirstOrDefaultAsync(g => g.Id == greenhousedto.Id);
-        if(greenhouse == null || greenhouse.UserEmail != email)
+        if (greenhouse == null || greenhouse.UserEmail != email)
             throw new UnauthorizedAccessException("Greenhouse not found or not paired with this user");
         greenhouse.Name = greenhousedto.Name;
         dbContext.Greenhouses.Update(greenhouse);
         await dbContext.SaveChangesAsync();
     }
-
 }
