@@ -23,7 +23,7 @@ namespace Tests
             var greenhouse = new Greenhouse
             {
                 Name = "GH1",
-                IpAddress = "192.168.0.10",
+                MacAddress = "192.168.0.10",
                 LightingMethod = "LED",
                 WateringMethod = "Auto",
                 FertilizationMethod = "Auto",
@@ -41,21 +41,21 @@ namespace Tests
                 new Action
                 {
                     Type = "Irrigation",
-                    Status = "Success",
+                    Status = true,
                     Timestamp = now.AddMinutes(-30),
                     GreenhouseId = greenhouseId
                 },
                 new Action
                 {
                     Type = "Ventilation",
-                    Status = "Failed",
+                    Status = false,
                     Timestamp = now.AddHours(-1),
                     GreenhouseId = greenhouseId
                 },
                 new Action
                 {
                     Type = "Lighting",
-                    Status = "Success",
+                    Status = true,
                     Timestamp = now.AddDays(-2),
                     GreenhouseId = greenhouseId
                 }
