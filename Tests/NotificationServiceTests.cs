@@ -2,6 +2,9 @@ using Api.Services;
 using Data.Entities;
 using Tests.Helpers;
 using Xunit;
+using System.Collections.Generic;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging.Abstractions;
 
 public class NotificationServiceTests
 {
@@ -10,11 +13,17 @@ public class NotificationServiceTests
     {
         // Arrange
         var dbContext = TestDbHelper.GetInMemoryDbContext();
+        
+        // Create configuration and logger for NotificationService
+        var configuration = new ConfigurationBuilder()
+            .AddInMemoryCollection(new Dictionary<string, string>())
+            .Build();
+        var logger = NullLogger<NotificationService>.Instance;
 
         var greenhouse = new Greenhouse
         {
             Name = "GH1",
-            MacAddress = "192.168.0.10",
+            MacAddress = "00:1A:2B:3C:4D:5E",
             LightingMethod = "LED",
             WateringMethod = "Auto",
             FertilizationMethod = "Auto",
@@ -50,7 +59,7 @@ public class NotificationServiceTests
 
         await dbContext.SaveChangesAsync();
 
-        var service = new NotificationService(dbContext);
+        var service = new NotificationService(configuration, dbContext, logger);
 
         // Act
         var result = await service.GetNotificationsForPeriodAsync(
