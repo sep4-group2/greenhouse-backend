@@ -4,6 +4,7 @@ using Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Data.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250520080222_MacAdressGreenhouseAndActionStatusBool")]
+    partial class MacAdressGreenhouseAndActionStatusBool
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -48,37 +51,6 @@ namespace Data.Migrations
                     b.HasIndex("GreenhouseId");
 
                     b.ToTable("Actions");
-                });
-
-            modelBuilder.Entity("Data.Entities.Device", b =>
-                {
-                    b.Property<int>("DeviceId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("DeviceId"));
-
-                    b.Property<string>("Auth")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Endpoint")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("P256dh")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("UserEmail")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("DeviceId");
-
-                    b.HasIndex("UserEmail");
-
-                    b.ToTable("Devices");
                 });
 
             modelBuilder.Entity("Data.Entities.Greenhouse", b =>
@@ -336,17 +308,6 @@ namespace Data.Migrations
                     b.Navigation("Greenhouse");
                 });
 
-            modelBuilder.Entity("Data.Entities.Device", b =>
-                {
-                    b.HasOne("Data.Entities.User", "User")
-                        .WithMany("Devices")
-                        .HasForeignKey("UserEmail")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("Data.Entities.Greenhouse", b =>
                 {
                     b.HasOne("Data.Entities.Preset", "ActivePreset")
@@ -463,8 +424,6 @@ namespace Data.Migrations
 
             modelBuilder.Entity("Data.Entities.User", b =>
                 {
-                    b.Navigation("Devices");
-
                     b.Navigation("Greenhouses");
 
                     b.Navigation("UserPresets");

@@ -6,6 +6,8 @@ using Microsoft.EntityFrameworkCore;
 using Data;
 using Azure.Identity;
 using Azure.Security.KeyVault.Secrets;
+using DataConsumer.Service;
+using DataConsumer.Services;
 
 // Set up configuration
 var environment = Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT") ?? "Release";
@@ -68,8 +70,6 @@ try
     var optionsBuilder = new DbContextOptionsBuilder<AppDbContext>();
     optionsBuilder.UseSqlServer(connectionString);
     var dbContext = new AppDbContext(optionsBuilder.Options);
-    using (dbContext)
-    {
         // This will verify if we can connect to the database
         bool canConnect = dbContext.Database.CanConnect();
 
@@ -83,10 +83,11 @@ try
         {
             Console.WriteLine("Failed to connect to the database.");
         }
-    }
-
+    
+    var sensorService = new SensorService(dbContext, new SensorReadingValidator(dbContext));
+    var actionService= new ActionService( dbContext);
     // Create and use the simple MQTT client
-    var mqttClient = new SimpleMqttClient(configuration, dbContext);
+    var mqttClient = new SimpleMqttClient(configuration, dbContext, sensorService, actionService);
     await mqttClient.ConnectAndKeepAlive();
     await mqttClient.SubscribeToTopics(topics);
 

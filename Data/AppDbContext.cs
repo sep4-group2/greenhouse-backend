@@ -62,14 +62,14 @@ public class AppDbContext : DbContext
             .UsingEntity<Dictionary<string, object>>(
                 "NotificationUser",
                 j => j.HasOne<User>()
-                      .WithMany()
-                      .HasForeignKey("UserId")
-                      .HasPrincipalKey(u => u.email)
-                      .OnDelete(DeleteBehavior.Restrict), // Prevent cascade from User
+                    .WithMany()
+                    .HasForeignKey("UserId")
+                    .HasPrincipalKey(u => u.email)
+                    .OnDelete(DeleteBehavior.Restrict), // Prevent cascade from User
                 j => j.HasOne<Notification>()
-                      .WithMany()
-                      .HasForeignKey("NotificationId")
-                      .OnDelete(DeleteBehavior.Cascade)  // Allow cascade from Notification
+                    .WithMany()
+                    .HasForeignKey("NotificationId")
+                    .OnDelete(DeleteBehavior.Cascade) // Allow cascade from Notification
             );
 
         // Fix the key length issue for the join table
@@ -89,13 +89,13 @@ public class AppDbContext : DbContext
             .HasOne(up => up.Preset)
             .WithOne()
             .HasForeignKey<UserPreset>(up => up.Id);
-        
+
         // Action
         modelBuilder.Entity<Action>()
             .HasOne(a => a.Greenhouse)
             .WithMany(g => g.Actions)
             .HasForeignKey(a => a.GreenhouseId);
-        
+
         modelBuilder.Entity<Preset>().HasData(new Preset
         {
             Id = 1,
@@ -113,9 +113,27 @@ public class AppDbContext : DbContext
         {
             Id = 1 // Matches the Preset ID
         });
-       
+
+        //create a user
+        modelBuilder.Entity<User>().HasData(new User
+        {
+            email = "bob@smartgrow.nothing",
+            Password = "AQAAAAIAAYagAAAAEDYARcRmYHoWH6vaS2iNLm5nA8hbhelY6ie7l9JZarybfFcBko+tUpqRBRg3m02loQ=="
+        });
+
+        //create a greenhouse
+        modelBuilder.Entity<Greenhouse>().HasData(new Greenhouse
+        {
+            Id = 1,
+            Name = "Default Greenhouse",
+            WateringMethod = "manual",
+            LightingMethod = "manual",
+            FertilizationMethod = "manual",
+            MacAddress = "FF:9A:4C:98:6E:17",
+            UserEmail = "bob@smartgrow.nothing"
+        });
     }
-    
+
     public DbSet<User> Users { get; set; }
     public DbSet<Greenhouse> Greenhouses { get; set; }
     public DbSet<Preset> Presets { get; set; }
@@ -123,7 +141,7 @@ public class AppDbContext : DbContext
     public DbSet<UserPreset> UserPresets { get; set; }
     public DbSet<SensorReading> SensorReadings { get; set; }
     public DbSet<Notification> Notifications { get; set; }
-    
+
     public DbSet<Action> Actions { get; set; }
     public DbSet<Device> Devices { get; set; }
 

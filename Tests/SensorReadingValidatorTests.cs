@@ -28,7 +28,7 @@ namespace Tests
             var greenhouse = new Greenhouse
             {
                 Name = "Test Greenhouse",
-                IpAddress = "192.168.1.10",
+                MacAddress = "192.168.1.10",
                 LightingMethod = "bulb",
                 WateringMethod = "auto",
                 FertilizationMethod = "auto",
@@ -56,7 +56,7 @@ namespace Tests
             // Assert
             var notifications = await dbContext.Notifications.ToListAsync();
             Assert.Single(notifications);
-            Assert.Equal(1, notifications[0].GreenhouseId);
+            Assert.Equal(2, notifications[0].GreenhouseId); // Because one is already seeded at this point 
         }
     }
 }
