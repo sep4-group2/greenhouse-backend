@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using Api.DTOs;
 using Api.Middleware;
 using Api.Services;
 using Data.Entities;
@@ -15,8 +16,9 @@ public class PresetController : ControllerBase
         _presetService = presetService;
     }
 
+    [AuthenticateUser]
     [HttpPost]
-    public async Task<IActionResult> CreatePreset([FromBody] Preset preset)
+    public async Task<IActionResult> CreatePreset([FromBody] CreatePresetDTO preset)
     {
         if (!ModelState.IsValid)
             return BadRequest(ModelState);

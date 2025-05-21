@@ -1,3 +1,4 @@
+using Api.DTOs;
 using Data;
 using Data.Entities;
 using Microsoft.EntityFrameworkCore;
@@ -18,20 +19,38 @@ public class PresetService
         return await _ctx.Presets.FindAsync(id);
     }
 
-    public async Task<Preset> CreatePresetAsync(Preset preset)
+    public async Task<Preset> CreatePresetAsync(CreatePresetDTO preset)
     {
         //Check if user preset is null, if it is, throw an error
-        if (preset.UserPreset == null)
+        if (preset.UserEmail == null)
         {
             throw new Exception("User preset cannot be null");
         }
         
-        //If not null, save the user preset
-        _ctx.UserPresets.Add(preset.UserPreset);
+        var createdPreset = _ctx.Presets.Add(new Preset()
+        {
+            HoursOfLight = preset.HoursOfLight,
+            MaxAirHumidity = preset.MaxAirHumidity,
+            MaxSoilHumidity = preset.MaxSoilHumidity,
+            MaxTemperature = preset.MaxTemperature,
+            MinAirHumidity = preset.MinAirHumidity,
+            MinSoilHumidity = preset.MinSoilHumidity,
+            MinTemperature = preset.MinTemperature,
+            Name = preset.Name,
+        });
         
-        _ctx.Presets.Add(preset);
+        //If not null, save the user preset
+        _ctx.UserPresets.Add(new UserPreset()
+        {
+            UserEmail = preset.UserEmail,
+            Preset = createdPreset.Entity
+        });
+        
         await _ctx.SaveChangesAsync();
-        return preset;
+        
+        Preset result = await _ctx.Presets.FindAsync(createdPreset.Entity.Id);
+        
+        return result;
     }
 
     public async Task<bool> UpdatePresetAsync(int id, Preset preset, string userEmail)
