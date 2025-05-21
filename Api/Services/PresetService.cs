@@ -20,15 +20,45 @@ public class PresetService
 
     public async Task<Preset> CreatePresetAsync(Preset preset)
     {
+        //Check if user preset is null, if it is, throw an error
+        if (preset.UserPreset == null)
+        {
+            throw new Exception("User preset cannot be null");
+        }
+        
+        //If not null, save the user preset
+        _ctx.UserPresets.Add(preset.UserPreset);
+        
         _ctx.Presets.Add(preset);
         await _ctx.SaveChangesAsync();
         return preset;
     }
 
-    public async Task<bool> UpdatePresetAsync(int id, Preset preset)
+    public async Task<bool> UpdatePresetAsync(int id, Preset preset, string userEmail)
     {
         if (id != preset.Id)
             return false;
+        
+        //Get preset from the database
+        var savedPreset = await _ctx.Presets.Where(p => p.Id == id).Include(p => p.UserPreset).Include(p => p.SystemPreset).FirstOrDefaultAsync();
+        
+        //Check if preset returned is null or not
+        if (savedPreset == null)
+        {
+            throw new Exception("Preset not found");
+        }
+        
+        //Check if it is a system preset
+        if (savedPreset.SystemPreset != null)
+        {
+            throw new Exception("Cannot modify system preset");
+        }
+        
+        //Check if the preset belongs to the user
+        if (savedPreset.UserPreset.UserEmail != userEmail)
+        {
+            throw new Exception("Cannot modify preset belonging to other users");
+        }
 
         _ctx.Entry(preset).State = EntityState.Modified;
 
