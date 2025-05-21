@@ -27,6 +27,7 @@ public class PresetController : ControllerBase
         return CreatedAtAction(nameof(GetPreset), new { id = created.Id }, created);
     }
 
+    [AuthenticateUser]
     [HttpGet("{id}")]
     public async Task<IActionResult> GetPreset(int id)
     {
@@ -39,7 +40,7 @@ public class PresetController : ControllerBase
 
     [AuthenticateUser]
     [HttpPut("{id}")]
-    public async Task<IActionResult> UpdatePreset(int id, [FromBody] Preset preset)
+    public async Task<IActionResult> UpdatePreset(int id, [FromBody] UpdatePresetDTO preset)
     {
         if (!ModelState.IsValid)
             return BadRequest(ModelState);

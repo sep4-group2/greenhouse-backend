@@ -53,7 +53,7 @@ public class PresetService
         return result;
     }
 
-    public async Task<bool> UpdatePresetAsync(int id, Preset preset, string userEmail)
+    public async Task<bool> UpdatePresetAsync(int id, UpdatePresetDTO preset, string userEmail)
     {
         if (id != preset.Id)
             return false;
@@ -78,11 +78,20 @@ public class PresetService
         {
             throw new Exception("Cannot modify preset belonging to other users");
         }
-
-        _ctx.Entry(preset).State = EntityState.Modified;
+        
+        //Modify preset to save
+        savedPreset.Name = preset.Name;
+        savedPreset.MinTemperature = preset.MinTemperature;
+        savedPreset.MaxTemperature = preset.MaxTemperature;
+        savedPreset.MinAirHumidity = preset.MinAirHumidity;
+        savedPreset.MaxAirHumidity = preset.MaxAirHumidity;
+        savedPreset.MinSoilHumidity = preset.MinSoilHumidity;
+        savedPreset.MaxSoilHumidity = preset.MaxSoilHumidity;
+        savedPreset.HoursOfLight = preset.HoursOfLight;
 
         try
         {
+            _ctx.Presets.Update(savedPreset);
             await _ctx.SaveChangesAsync();
             return true;
         }
