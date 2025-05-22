@@ -1,6 +1,4 @@
 ﻿using Data;
-using Data.Entities;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 namespace Api.Services;
@@ -8,15 +6,13 @@ namespace Api.Services;
 public class UserService
 {
     private readonly AppDbContext _context;
-    private readonly IPasswordHasher<User> _passwordHasher;
 
-    public UserService(AppDbContext context, IPasswordHasher<User> passwordHasher)
+    public UserService(AppDbContext context)
     {
         _context = context;
-        _passwordHasher = passwordHasher;
     }
 
-    public async Task DeleteUser(string email, string password)
+    public async Task DeleteUser(string email)
     {
         if(string.IsNullOrEmpty(email))
             throw new UnauthorizedAccessException("Email claim missing");
@@ -25,9 +21,6 @@ public class UserService
         {
             throw new Exception("User not found");
         }
-        var result = _passwordHasher.VerifyHashedPassword(user, user.Password, password);
-        if(result == PasswordVerificationResult.Failed)
-            throw new UnauthorizedAccessException("Invalid Password");
         _context.Users.Remove(user);
         await _context.SaveChangesAsync();
     }
