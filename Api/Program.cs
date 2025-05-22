@@ -60,6 +60,9 @@ builder.Services.AddDbContext<Data.AppDbContext>(options =>
 
 var app = builder.Build();
 
+// Use global exception middleware
+app.UseMiddleware<Api.Middleware.ExceptionMiddleware>();
+
 // write line database connection string
 
 using (var scope = app.Services.CreateScope())
