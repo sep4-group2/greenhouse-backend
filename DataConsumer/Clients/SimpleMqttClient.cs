@@ -2,7 +2,6 @@ using System.Text;
 using System.Text.Json;
 using Data;
 using Data.Entities;
-using DataConsumer.Service;
 using DataConsumer.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -16,18 +15,13 @@ public class SimpleMqttClient
     private readonly MqttClientOptions _options;
     private readonly AppDbContext _dbContext;
     private readonly SensorReadingValidator _validator;
-    private readonly SensorService _sensorService;
-    private readonly ActionService _actionService;
 
-    public SimpleMqttClient(IConfiguration configuration, AppDbContext dbContext, SensorService sensorService, ActionService actionService)
+    public SimpleMqttClient(IConfiguration configuration, AppDbContext dbContext)
     {
         var host = configuration["MQTT:Host"] ?? "localhost";
         var port = int.Parse(configuration["MQTT:Port"] ?? "1883");
-        
         _dbContext = dbContext;
         _validator = new SensorReadingValidator(dbContext);
-        _sensorService = sensorService;
-        _actionService = actionService;
             
         var factory = new MqttClientFactory();
         _client = factory.CreateMqttClient();
@@ -112,13 +106,28 @@ public class SimpleMqttClient
     {
         if (topic == "greenhouse/sensor")
         {
-            await _sensorService.HandleSensorData(message);
-        }
-        else if (topic == "greenhouse/action")
-        {
-            await _actionService.HandleAction(message);
-        }
-
+            try
+            {
+                var sensorData = JsonSerializer.Deserialize<SensorReading>(message);
+                var data = new SensorReading()
+                {
+                    Type = sensorData.Type,
+                    Value = sensorData.Value,
+                    Unit = sensorData.Unit,
+                    Timestamp = sensorData.Timestamp,
+                    GreenhouseId = sensorData.GreenhouseId,
+                    Greenhouse = sensorData.Greenhouse
+                };
+                    //edit the data based on what is actually coming through
+            
+                _dbContext.SensorReadings.Add(data);
+                await _dbContext.SaveChangesAsync();
+                await _validator.ValidateAndTriggerAsync(data);
+            }
+            catch (JsonException e)
+            {
+                Console.WriteLine($"Failed to parse message: {e.Message}");
+            }}
         //insert notification action and save to database if message is action
     }
 }

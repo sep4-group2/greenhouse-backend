@@ -35,14 +35,9 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
 
 
-builder.Services.AddScoped<AuthService>();
-builder.Services.AddScoped<UserService>();
-builder.Services.AddScoped<GreenhouseService>();
-
 
 builder.Services.AddScoped<ActionService>();
 builder.Services.AddScoped<SensorReadingsService>();
-
 
 // Add database context
 builder.Services.AddDbContext<Data.AppDbContext>(options =>
@@ -51,6 +46,7 @@ builder.Services.AddDbContext<Data.AppDbContext>(options =>
 var app = builder.Build();
 
 // write line database connection string
+Console.WriteLine($"Database connection string: {builder.Configuration.GetConnectionString("DefaultConnection")}");
 
 using (var scope = app.Services.CreateScope())
 {
@@ -58,11 +54,11 @@ using (var scope = app.Services.CreateScope())
     try
     {
         var dbContext = services.GetRequiredService<Data.AppDbContext>();
-        dbContext.Database.EnsureCreated();
         if (dbContext.Database.CanConnect())
         {
             app.Logger.LogInformation("Successfully connected to the database!");
             // Ensure database is created
+            dbContext.Database.EnsureCreated();
             app.Logger.LogInformation("Database exists or has been created.");
         }
         else
