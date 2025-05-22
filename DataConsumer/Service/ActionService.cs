@@ -31,7 +31,7 @@ public class ActionService(AppDbContext context)
             {
                 Type = actionMessageDto.Command,
                 Status = actionMessageDto.Status,
-                Timestamp = actionMessageDto.Timestamp,
+                Timestamp = DateTime.Now,
                 GreenhouseId = greenhouse.Id
             };
             context.Actions.Add(action);
