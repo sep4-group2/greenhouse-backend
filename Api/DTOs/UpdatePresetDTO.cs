@@ -24,6 +24,4 @@ public class UpdatePresetDTO
     public double MinSoilHumidity { get; set; }
     public double MaxSoilHumidity { get; set; }
     public int HoursOfLight { get; set; }
-    [Required]
-    public string UserEmail { get; set; }
 }
