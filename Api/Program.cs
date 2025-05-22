@@ -1,4 +1,5 @@
 using System.Text;
+using Api.Clients;
 using Data.Entities;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
@@ -33,7 +34,7 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
 
-
+builder.Services.AddSingleton<ApiMqttClient>();
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<GreenhouseService>();

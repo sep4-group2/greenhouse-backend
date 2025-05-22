@@ -19,13 +19,14 @@ public class ActionService(AppDbContext context)
 
             var greenhouse = await context.Greenhouses
                 .FirstOrDefaultAsync(g => g.MacAddress == actionMessageDto.MacAddress);
+
             
             if (greenhouse == null)
             {
                 Console.WriteLine($"Greenhouse with MAC address {actionMessageDto.MacAddress} not found.");
                 return;
             }
-            
+
             var action = new Data.Entities.Action
             {
                 Type = actionMessageDto.Command,

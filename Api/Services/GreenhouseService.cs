@@ -27,7 +27,7 @@ public class GreenhouseService(AppDbContext dbContext)
         if (user == null)
             throw new UnauthorizedAccessException("User not found");
         var greenhouse = await dbContext.Greenhouses.FirstOrDefaultAsync(g => g.MacAddress == greenhousedto.MacAddress);
-        if (greenhouse == null)
+        if(greenhouse == null)
         {
             greenhouse = new Greenhouse
             {
