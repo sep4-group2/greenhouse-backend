@@ -19,9 +19,9 @@ public class UserController : ControllerBase
 
     [HttpDelete]
     [AuthenticateUser]
-    public async Task<ActionResult<UserDto>> DeleteUser()
+    public async Task<ActionResult<UserDto>> DeleteUser(string password)
     {
-        await _userService.DeleteUser(User.FindFirstValue(ClaimTypes.Email));
+        await _userService.DeleteUser(User.FindFirstValue(ClaimTypes.Email), password);
         return Ok("User deleted successfully");
     }
 }
