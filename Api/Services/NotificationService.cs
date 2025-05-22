@@ -44,7 +44,7 @@ public class NotificationService: INotificationService
     public async Task SendNotification(SendNotificationDTO notification)
     {
         //Get all devices connected to the user
-        List<Device> devices = _ctx.Devices.Where(d => d.UserEmail == notification.userEmail).ToList();
+        List<Device> devices = await _ctx.Devices.Where(d => d.UserEmail == notification.userEmail).ToListAsync();
         
         //Go through subscriptions and send the notifications
         foreach (Device device in devices)

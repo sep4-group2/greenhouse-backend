@@ -7,7 +7,6 @@ using Tests.Helpers;
 using WebPush;
 using Xunit;
 using System.Collections.Generic;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging.Abstractions;
 
 public class NotificationServiceTests
