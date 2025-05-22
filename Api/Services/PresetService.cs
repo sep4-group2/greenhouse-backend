@@ -91,6 +91,7 @@ public class PresetService
 
         try
         {
+            //Should this send out a notification to all greenhouses connected to it to change?
             _ctx.Presets.Update(savedPreset);
             await _ctx.SaveChangesAsync();
             return true;
@@ -106,6 +107,16 @@ public class PresetService
     public async Task<bool> DeletePresetAsync(int id)
     {
         var preset = await _ctx.Presets.FindAsync(id);
+        
+        //Check if the preset is connected to any greenhouses
+        var connectedGreenhouses = await _ctx.Greenhouses.Where(g => g.ActivePresetId == id).ToListAsync();
+
+        //If it is it cannot be deleted
+        if (connectedGreenhouses != null || connectedGreenhouses.Count > 0)
+        {
+            throw new Exception("Cannot delete preset currently in use");
+        }
+        
         if (preset == null)
             return false;
 
