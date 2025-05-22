@@ -24,7 +24,7 @@ public class ApiMqttClient
         
         var builder = new MqttClientOptionsBuilder()
             .WithTcpServer(host, port)
-            .WithClientId($"DataConsumer_{Guid.NewGuid()}");
+            .WithClientId($"Api_{Guid.NewGuid()}");
         
         if (configuration["MQTT:Username"] != null && configuration["MQTT:Password"] != null)
         {
