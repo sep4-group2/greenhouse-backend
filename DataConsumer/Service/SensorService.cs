@@ -29,7 +29,7 @@ public class SensorService(AppDbContext dbContext, SensorReadingValidator valida
                     Type = sensorData.Type,
                     Value = sensorData.Value,
                     Unit = sensorData.Unit,
-                    Timestamp = sensorData.Timestamp,
+                    Timestamp = DateTime.Now,
                     GreenhouseId = greenhouse.Id
                 };
                 dbContext.SensorReadings.Add(data);

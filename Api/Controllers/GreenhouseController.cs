@@ -17,6 +17,29 @@ public class GreenhouseController : ControllerBase
         _greenhouseService = greenhouseService;
     }
     
+    [HttpGet()]
+    [AuthenticateUser]
+    public async Task<ActionResult<List<GreenhouseDto>>> GetAllGreenhouses()
+    {
+        var email = User.FindFirstValue(ClaimTypes.Email);
+        
+        var greenhouses = await _greenhouseService.GetAllGreenhousesForUser(email!);
+        
+        // map it to DTOs
+        return greenhouses.Select(g => new GreenhouseDto
+        {
+            Id = g.Id,
+            Name = g.Name,
+            MacAddress = g.MacAddress,
+            LightingMethod = g.LightingMethod,
+            WateringMethod = g.WateringMethod,
+            FertilizationMethod = g.FertilizationMethod,
+            UserEmail = g.UserEmail,
+            ActivePresetId = g.ActivePresetId,
+            ActivePresetName = g.ActivePreset?.Name
+        }).ToList();
+    }
+    
     [HttpPost("pair")]
     [AuthenticateUser]
     public async Task<ActionResult> PairGreenhouse([FromBody] GreenhousePairDto greenhousePair)

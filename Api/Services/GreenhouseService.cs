@@ -7,6 +7,18 @@ namespace Api.Services;
 
 public class GreenhouseService(AppDbContext dbContext)
 {
+    public async Task<List<Greenhouse>> GetAllGreenhousesForUser(string email)
+    {
+        if (string.IsNullOrEmpty(email))
+            throw new UnauthorizedAccessException("Email claim missing");
+        var user = await dbContext.Users.FirstOrDefaultAsync(u => u.email == email);
+        if(user == null)
+            throw new UnauthorizedAccessException("User not found");
+        return await dbContext.Greenhouses
+            .Where(g => g.UserEmail == email)
+            .Include(g => g.ActivePreset)
+            .ToListAsync();
+    }
     public async Task<Greenhouse> SetPresetAsync(Greenhouse greenhouse, Preset preset)
     {
         ArgumentNullException.ThrowIfNull(greenhouse);
@@ -27,7 +39,7 @@ public class GreenhouseService(AppDbContext dbContext)
         if (user == null)
             throw new UnauthorizedAccessException("User not found");
         var greenhouse = await dbContext.Greenhouses.FirstOrDefaultAsync(g => g.MacAddress == greenhousedto.MacAddress);
-        if (greenhouse == null)
+        if(greenhouse == null)
         {
             greenhouse = new Greenhouse
             {
