@@ -67,7 +67,7 @@ public class GreenhouseController : ControllerBase
         return Ok($"Greenhouse has been renamed to {greenhouse.Name}");
     }
 
-    [HttpPut("{id}/preset")]
+    [HttpPut("preset/{id}")]
     [AuthenticateUser]
     public async Task<ActionResult> SetPresetToGreenhouse([FromRoute] int greenhouseId, [FromBody] int presetId)
     {
@@ -76,7 +76,7 @@ public class GreenhouseController : ControllerBase
         return Ok($"Preset with id {presetId} has been set to greenhouse {greenhouseId}");
     }
 
-    [HttpPut("{id}/configure")]
+    [HttpPut("configure/{id}")]
     [AuthenticateUser]
     public async Task<ActionResult> SetConfigurationForGreenhouse([FromRoute] int greenhouseId,
         [FromBody] ConfigurationDto configuration)
@@ -84,5 +84,19 @@ public class GreenhouseController : ControllerBase
         var email = User.FindFirstValue(ClaimTypes.Email);
         await _greenhouseService.SetConfigurationForGreenhouse(email, greenhouseId, configuration);
         return Ok($"{configuration.Type} has been set to {configuration.Type}");
+    }
+
+    [HttpPost("predict/{greenhouseId}")]
+    [AuthenticateUser]
+    public async Task<ActionResult<PredictionResultDto>> GetPrediction(int greenhouseId)
+    {
+        var email = User.FindFirstValue(ClaimTypes.Email);
+        if (string.IsNullOrEmpty(email))
+        {
+            return Unauthorized("Email claim missing");
+        }
+
+        var result = await _greenhouseService.GetPredictionFromLatestValuesAsync(greenhouseId);
+        return Ok(result);
     }
 }

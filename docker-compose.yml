@@ -74,6 +74,14 @@ services:
       - MQTT_PORT=1883
       - SENSOR_INTERVAL=60
 
+  mal-api:
+    image: ghcr.io/sep4-group2/mal-api:latest
+    container_name: mal_api_service
+    restart: always
+    ports:
+      - "1337:1337"
+    environment:
+      - PORT=1337
 
 volumes:
   mssql_data:

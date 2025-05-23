@@ -48,6 +48,8 @@ builder.Services.AddScoped<PresetService>();
 builder.Services.AddScoped<ActionService>();
 builder.Services.AddScoped<SensorReadingsService>();
 
+builder.Services.AddHttpClient();
+
 // Add CORS policy
 builder.Services.AddCors(options =>
 {
