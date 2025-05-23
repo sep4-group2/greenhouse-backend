@@ -67,7 +67,7 @@ public class GreenhouseController : ControllerBase
         return Ok($"Greenhouse has been renamed to {greenhouse.Name}");
     }
 
-    [HttpPut("{id}/preset")]
+    [HttpPut("preset/{id}")]
     [AuthenticateUser]
     public async Task<ActionResult> SetPresetToGreenhouse([FromRoute] int greenhouseId, [FromBody] int presetId)
     {
@@ -76,7 +76,7 @@ public class GreenhouseController : ControllerBase
         return Ok($"Preset with id {presetId} has been set to greenhouse {greenhouseId}");
     }
 
-    [HttpPut("{id}/configure")]
+    [HttpPut("configure/{id}")]
     [AuthenticateUser]
     public async Task<ActionResult> SetConfigurationForGreenhouse([FromRoute] int greenhouseId,
         [FromBody] ConfigurationDto configuration)

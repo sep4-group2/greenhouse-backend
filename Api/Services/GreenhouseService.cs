@@ -19,13 +19,12 @@ public class GreenhouseService
         IHttpClientFactory httpClientFactory,
         IConfiguration configuration,
         ConfigurationService configurationService
-        
     )
     {
         _dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
         _httpClient = httpClientFactory.CreateClient();
         _mlBaseUrl = configuration["MalApi:BaseUrl"]
-            ?? throw new ArgumentNullException("MalApi:BaseUrl configuration is missing");
+                     ?? throw new ArgumentNullException("MalApi:BaseUrl configuration is missing");
         _configurationService = configurationService;
     }
 
@@ -65,8 +64,7 @@ public class GreenhouseService
         if (user == null)
             throw new UnauthorizedAccessException("User not found");
 
-        var greenhouse = await _dbContext.Greenhouses.FirstOrDefaultAsync(
-            g => g.MacAddress == greenhousedto.MacAddress
+        var greenhouse = await _dbContext.Greenhouses.FirstOrDefaultAsync(g => g.MacAddress == greenhousedto.MacAddress
         );
 
         if (greenhouse == null)
@@ -187,29 +185,29 @@ public class GreenhouseService
 
         return result;
     }
-    
-        public async Task SetPresetToGreenhouse(int greenhouseId, int presetId, string email)
+
+    public async Task SetPresetToGreenhouse(int greenhouseId, int presetId, string email)
     {
         if (string.IsNullOrEmpty(email))
             throw new UnauthorizedAccessException("Email claim missing");
-        var greenhouse = await dbContext.Greenhouses.FirstOrDefaultAsync(g => g.Id == greenhouseId);
+        var greenhouse = await _dbContext.Greenhouses.FirstOrDefaultAsync(g => g.Id == greenhouseId);
         if (greenhouse == null || greenhouse.UserEmail != email)
             throw new UnauthorizedAccessException("Greenhouse not found or not paired with this user");
-        var preset = await dbContext.Presets.FirstOrDefaultAsync(p => p.Id == presetId);
-        if(preset == null)
-           throw new UnauthorizedAccessException("Preset not found or not paired with this user");
-           
+        var preset = await _dbContext.Presets.FirstOrDefaultAsync(p => p.Id == presetId);
+        if (preset == null)
+            throw new UnauthorizedAccessException("Preset not found or not paired with this user");
+
         greenhouse.ActivePresetId = preset.Id;
-        dbContext.Greenhouses.Update(greenhouse);
-        await dbContext.SaveChangesAsync();
-        await configurationService.SendConfiguration(preset, greenhouse);
+        _dbContext.Greenhouses.Update(greenhouse);
+        await _dbContext.SaveChangesAsync();
+        await _configurationService.SendConfiguration(preset, greenhouse);
     }
 
     public async Task SetConfigurationForGreenhouse(string email, int greenhouseId, ConfigurationDto configuration)
     {
         if (string.IsNullOrEmpty(email))
             throw new UnauthorizedAccessException("Email claim missing");
-        var greenhouse = await dbContext.Greenhouses.FirstOrDefaultAsync(g => g.Id == greenhouseId);
+        var greenhouse = await _dbContext.Greenhouses.FirstOrDefaultAsync(g => g.Id == greenhouseId);
         if (greenhouse == null || greenhouse.UserEmail != email)
             throw new UnauthorizedAccessException("Greenhouse not found or not paired with this user");
         switch (configuration.Type)
@@ -226,12 +224,13 @@ public class GreenhouseService
             default:
                 throw new UnauthorizedAccessException("Unknown configuration type");
         }
-        var preset = await dbContext.Presets.FirstOrDefaultAsync(p => p.Id == greenhouse.ActivePresetId);
-        if(preset == null)
+
+        var preset = await _dbContext.Presets.FirstOrDefaultAsync(p => p.Id == greenhouse.ActivePresetId);
+        if (preset == null)
             throw new UnauthorizedAccessException("Preset not found or not paired with this user");
-        
-        dbContext.Greenhouses.Update(greenhouse);
-        await dbContext.SaveChangesAsync();
-        await configurationService.SendConfiguration(preset, greenhouse);
+
+        _dbContext.Greenhouses.Update(greenhouse);
+        await _dbContext.SaveChangesAsync();
+        await _configurationService.SendConfiguration(preset, greenhouse);
     }
 }
