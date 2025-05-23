@@ -1,4 +1,5 @@
 using System.Text;
+using Api.Clients;
 using Data.Entities;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
@@ -33,6 +34,7 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
 
+builder.Services.AddSingleton<ApiMqttClient>();
 
 builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddScoped<AuthService>();
@@ -59,6 +61,9 @@ builder.Services.AddDbContext<Data.AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 var app = builder.Build();
+
+// Use global exception middleware
+app.UseMiddleware<Api.Middleware.ExceptionMiddleware>();
 
 // write line database connection string
 

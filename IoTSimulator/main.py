@@ -37,6 +37,7 @@ def generate_sensor_data():
     temperature = round(random.uniform(18.0, 32.0), 1)
     humidity = round(random.uniform(40.0, 80.0), 1)
     soil_humidity = round(random.uniform(30.0, 70.0), 1)
+    air_humidity = round(random.uniform(30.0, 70.0), 1)
     
     payload = {
         "MacAddress": MAC_ADDRESS,
@@ -45,19 +46,21 @@ def generate_sensor_data():
                 "Type": "Temperature",
                 "Value": temperature,
                 "Unit": "C",
-                "Timestamp": timestamp
             },
             {
                 "Type": "Humidity",
                 "Value": humidity,
                 "Unit": "%",
-                "Timestamp": timestamp
             },
             {
                 "Type": "SoilHumidity",
                 "Value": soil_humidity,
                 "Unit": "%",
-                "Timestamp": timestamp
+            },
+            {
+                "Type": "AirHumidity",
+                "Value": air_humidity,
+                "Unit": "%",
             }
         ]
     }

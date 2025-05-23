@@ -2,6 +2,7 @@ using Api.Services;
 using Data.Entities;
 using Tests.Helpers;
 using Action = Data.Entities.Action;
+using Api.Clients;
 
 namespace Tests
 {
@@ -63,7 +64,10 @@ namespace Tests
 
             await dbContext.SaveChangesAsync();
 
-            var service = new ActionService(dbContext);
+            // Create a test MQTT client
+            var testMqttClient = new TestApiMqttClient();
+            
+            var service = new ActionService(dbContext, testMqttClient);
 
             // Act
             var result = await service.PrepareActionsForPeriodAsync(

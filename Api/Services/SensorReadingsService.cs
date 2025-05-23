@@ -66,44 +66,40 @@ public class SensorReadingsService
 
     public async Task<List<PastSensorReadingResultDTO>> PreparePastSensorReadingsAsync(int greenhouseId, PastSensorReadingRequestDTO? pastDataRequest)
     {
-        List<PastSensorReadingResultDTO> result = new List<PastSensorReadingResultDTO>();
-            
-        //First, load all sensor readings for one specific greenhouse
-        var sensorReadings = _ctx.SensorReadings.Where(reading => reading.GreenhouseId == greenhouseId);
-            
-        //Filtering
+        var sensorReadings = _ctx.SensorReadings
+            .Where(reading => reading.GreenhouseId == greenhouseId);
+
+        // Filtering
         if (pastDataRequest != null)
         {
-            //Start with beforeDate: sensor readings before that specific date, INCLUDING the date itself
             if (pastDataRequest.BeforeDate != null)
             {
-                sensorReadings = sensorReadings.Where(reading =>
-                    reading.Timestamp.CompareTo(pastDataRequest.BeforeDate) <= 0);
+                sensorReadings = sensorReadings
+                    .Where(reading => reading.Timestamp <= pastDataRequest.BeforeDate);
             }
-
-            //afterDate: sensor readings after that specific date, INCLUDING the date itself
             if (pastDataRequest.AfterDate != null)
             {
-                sensorReadings = sensorReadings.Where(reading =>
-                    reading.Timestamp.CompareTo(pastDataRequest.AfterDate) >= 0);
+                sensorReadings = sensorReadings
+                    .Where(reading => reading.Timestamp >= pastDataRequest.AfterDate);
             }
-            
-            //sensorType: the type of the sensor reading
             if (pastDataRequest.ReadingType != null)
             {
-                sensorReadings = sensorReadings.Where(reading => reading.Type == pastDataRequest.ReadingType);
+                sensorReadings = sensorReadings
+                    .Where(reading => reading.Type == pastDataRequest.ReadingType);
             }
-            result = sensorReadings.Select(reading => new PastSensorReadingResultDTO
+        }
+
+        var result = await sensorReadings
+            .Select(reading => new PastSensorReadingResultDTO
             {
                 Id = reading.Id,
                 Timestamp = reading.Timestamp,
                 Type = reading.Type,
                 Unit = reading.Unit,
                 Value = reading.Value
-            }).ToList();
-        }
+            })
+            .ToListAsync();
 
         return result;
     }
-    
 }
