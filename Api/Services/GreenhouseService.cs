@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Api.Services;
 
-public class GreenhouseService(AppDbContext dbContext)
+public class GreenhouseService(AppDbContext dbContext, ConfigurationService configurationService)
 {
     public async Task<List<Greenhouse>> GetAllGreenhousesForUser(string email)
     {
@@ -83,5 +83,52 @@ public class GreenhouseService(AppDbContext dbContext)
         greenhouse.Name = greenhousedto.Name;
         dbContext.Greenhouses.Update(greenhouse);
         await dbContext.SaveChangesAsync();
+    }
+
+    public async Task SetPresetToGreenhouse(int greenhouseId, int presetId, string email)
+    {
+        if (string.IsNullOrEmpty(email))
+            throw new UnauthorizedAccessException("Email claim missing");
+        var greenhouse = await dbContext.Greenhouses.FirstOrDefaultAsync(g => g.Id == greenhouseId);
+        if (greenhouse == null || greenhouse.UserEmail != email)
+            throw new UnauthorizedAccessException("Greenhouse not found or not paired with this user");
+        var preset = await dbContext.Presets.FirstOrDefaultAsync(p => p.Id == presetId);
+        if(preset == null)
+           throw new UnauthorizedAccessException("Preset not found or not paired with this user");
+           
+        greenhouse.ActivePresetId = preset.Id;
+        dbContext.Greenhouses.Update(greenhouse);
+        await dbContext.SaveChangesAsync();
+        await configurationService.SendConfiguration(preset, greenhouse);
+    }
+
+    public async Task SetConfigurationForGreenhouse(string email, int greenhouseId, ConfigurationDto configuration)
+    {
+        if (string.IsNullOrEmpty(email))
+            throw new UnauthorizedAccessException("Email claim missing");
+        var greenhouse = await dbContext.Greenhouses.FirstOrDefaultAsync(g => g.Id == greenhouseId);
+        if (greenhouse == null || greenhouse.UserEmail != email)
+            throw new UnauthorizedAccessException("Greenhouse not found or not paired with this user");
+        switch (configuration.Type)
+        {
+            case "lighting":
+                greenhouse.LightingMethod = configuration.Method;
+                break;
+            case "watering":
+                greenhouse.WateringMethod = configuration.Method;
+                break;
+            case "fertilization":
+                greenhouse.FertilizationMethod = configuration.Method;
+                break;
+            default:
+                throw new UnauthorizedAccessException("Unknown configuration type");
+        }
+        var preset = await dbContext.Presets.FirstOrDefaultAsync(p => p.Id == greenhouse.ActivePresetId);
+        if(preset == null)
+            throw new UnauthorizedAccessException("Preset not found or not paired with this user");
+        
+        dbContext.Greenhouses.Update(greenhouse);
+        await dbContext.SaveChangesAsync();
+        await configurationService.SendConfiguration(preset, greenhouse);
     }
 }

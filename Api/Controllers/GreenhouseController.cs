@@ -66,4 +66,23 @@ public class GreenhouseController : ControllerBase
         await _greenhouseService.RenameGreenhouse(greenhouse, email);
         return Ok($"Greenhouse has been renamed to {greenhouse.Name}");
     }
+
+    [HttpPut("{id}/preset")]
+    [AuthenticateUser]
+    public async Task<ActionResult> SetPresetToGreenhouse([FromRoute] int greenhouseId, [FromBody] int presetId)
+    {
+        var email = User.FindFirstValue(ClaimTypes.Email);
+        await _greenhouseService.SetPresetToGreenhouse(greenhouseId, presetId, email);
+        return Ok($"Preset with id {presetId} has been set to greenhouse {greenhouseId}");
+    }
+
+    [HttpPut("{id}/configure")]
+    [AuthenticateUser]
+    public async Task<ActionResult> SetConfigurationForGreenhouse([FromRoute] int greenhouseId,
+        [FromBody] ConfigurationDto configuration)
+    {
+        var email = User.FindFirstValue(ClaimTypes.Email);
+        await _greenhouseService.SetConfigurationForGreenhouse(email, greenhouseId, configuration);
+        return Ok($"{configuration.Type} has been set to {configuration.Type}");
+    }
 }
