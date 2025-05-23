@@ -2,30 +2,51 @@ using Api.DTOs;
 using Data;
 using Data.Entities;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using System.Net.Http.Json;
 
 namespace Api.Services;
 
-public class GreenhouseService(AppDbContext dbContext)
+public class GreenhouseService
 {
+    private readonly AppDbContext _dbContext;
+    private readonly HttpClient _httpClient;
+    private readonly string _mlBaseUrl;
+
+    public GreenhouseService(
+        AppDbContext dbContext,
+        IHttpClientFactory httpClientFactory,
+        IConfiguration configuration
+    )
+    {
+        _dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
+        _httpClient = httpClientFactory.CreateClient();
+        _mlBaseUrl = configuration["MalApi:BaseUrl"]
+            ?? throw new ArgumentNullException("MalApi:BaseUrl configuration is missing");
+    }
+
     public async Task<List<Greenhouse>> GetAllGreenhousesForUser(string email)
     {
         if (string.IsNullOrEmpty(email))
             throw new UnauthorizedAccessException("Email claim missing");
-        var user = await dbContext.Users.FirstOrDefaultAsync(u => u.email == email);
-        if(user == null)
+
+        var user = await _dbContext.Users.FirstOrDefaultAsync(u => u.email == email);
+        if (user == null)
             throw new UnauthorizedAccessException("User not found");
-        return await dbContext.Greenhouses
+
+        return await _dbContext.Greenhouses
             .Where(g => g.UserEmail == email)
             .Include(g => g.ActivePreset)
             .ToListAsync();
     }
+
     public async Task<Greenhouse> SetPresetAsync(Greenhouse greenhouse, Preset preset)
     {
         ArgumentNullException.ThrowIfNull(greenhouse);
         ArgumentNullException.ThrowIfNull(preset);
 
-        dbContext.Greenhouses.Update(greenhouse);
-        await dbContext.SaveChangesAsync();
+        _dbContext.Greenhouses.Update(greenhouse);
+        await _dbContext.SaveChangesAsync();
 
         greenhouse.ActivePreset = preset;
         return greenhouse;
@@ -35,11 +56,16 @@ public class GreenhouseService(AppDbContext dbContext)
     {
         if (string.IsNullOrEmpty(email))
             throw new UnauthorizedAccessException("Email claim missing");
-        var user = await dbContext.Users.FirstOrDefaultAsync(u => u.email == email);
+
+        var user = await _dbContext.Users.FirstOrDefaultAsync(u => u.email == email);
         if (user == null)
             throw new UnauthorizedAccessException("User not found");
-        var greenhouse = await dbContext.Greenhouses.FirstOrDefaultAsync(g => g.MacAddress == greenhousedto.MacAddress);
-        if(greenhouse == null)
+
+        var greenhouse = await _dbContext.Greenhouses.FirstOrDefaultAsync(
+            g => g.MacAddress == greenhousedto.MacAddress
+        );
+
+        if (greenhouse == null)
         {
             greenhouse = new Greenhouse
             {
@@ -52,36 +78,129 @@ public class GreenhouseService(AppDbContext dbContext)
             };
         }
         else if (greenhouse.UserEmail != null)
+        {
             throw new UnauthorizedAccessException("This Greenhouse has already paired");
+        }
         else
+        {
             greenhouse.UserEmail = email;
+        }
 
-        dbContext.Greenhouses.Add(greenhouse);
-        await dbContext.SaveChangesAsync();
+        _dbContext.Greenhouses.Add(greenhouse);
+        await _dbContext.SaveChangesAsync();
     }
 
     public async Task UnpairGreenhouse(int id, string email)
     {
         if (string.IsNullOrEmpty(email))
             throw new UnauthorizedAccessException("Email claim missing");
-        var greenhouse = await dbContext.Greenhouses.FirstOrDefaultAsync(g => g.Id == id);
+
+        var greenhouse = await _dbContext.Greenhouses.FirstOrDefaultAsync(g => g.Id == id);
         if (greenhouse == null)
+        {
             throw new UnauthorizedAccessException("Greenhouse not found or not paired with this user");
-        greenhouse.UserEmail = null;
+        }
+
+        greenhouse.UserEmail = string.Empty;
         greenhouse.User = null;
-        dbContext.Greenhouses.Update(greenhouse);
-        await dbContext.SaveChangesAsync();
+
+        _dbContext.Greenhouses.Update(greenhouse);
+        await _dbContext.SaveChangesAsync();
     }
 
     public async Task RenameGreenhouse(GreenhouseRenameDto greenhousedto, string email)
     {
         if (string.IsNullOrEmpty(email))
             throw new UnauthorizedAccessException("Email claim missing");
-        var greenhouse = await dbContext.Greenhouses.FirstOrDefaultAsync(g => g.Id == greenhousedto.Id);
+
+        var greenhouse = await _dbContext.Greenhouses.FirstOrDefaultAsync(g => g.Id == greenhousedto.Id);
         if (greenhouse == null || greenhouse.UserEmail != email)
             throw new UnauthorizedAccessException("Greenhouse not found or not paired with this user");
+
         greenhouse.Name = greenhousedto.Name;
-        dbContext.Greenhouses.Update(greenhouse);
-        await dbContext.SaveChangesAsync();
+
+        _dbContext.Greenhouses.Update(greenhouse);
+        await _dbContext.SaveChangesAsync();
+    }
+
+    public async Task<PredictionResultDto> GetPredictionAsync(PredictionRequestDto request)
+    {
+        if (request == null)
+            throw new ArgumentNullException(nameof(request));
+
+        var response = await _httpClient.PostAsJsonAsync(_mlBaseUrl + "predict", request);
+
+        if (!response.IsSuccessStatusCode)
+        {
+            throw new Exception("Failed to fetch prediction from ML service");
+        }
+
+        var result = await response.Content.ReadFromJsonAsync<PredictionResultDto>();
+        if (result == null)
+        {
+            throw new Exception("Invalid response from ML service");
+        }
+
+        return result;
+    }
+
+    public async Task<PredictionResultDto> GetPredictionFromLatestValuesAsync(int greenhouseId)
+    {
+        // Fetch the latest sensor readings for each type
+        var soilMoisture = await _dbContext.SensorReadings
+            .Where(sr => sr.GreenhouseId == greenhouseId && sr.Type == "SoilHumidity")
+            .Select(sr => sr.Value)
+            .FirstOrDefaultAsync();
+
+        var ambientTemperature = await _dbContext.SensorReadings
+            .Where(sr => sr.GreenhouseId == greenhouseId && sr.Type == "Temperature")
+            .Select(sr => sr.Value)
+            .FirstOrDefaultAsync();
+
+        var humidity = await _dbContext.SensorReadings
+            .Where(sr => sr.GreenhouseId == greenhouseId && sr.Type == "Humidity")
+            .Select(sr => sr.Value)
+            .FirstOrDefaultAsync();
+
+        if (soilMoisture == default || ambientTemperature == default || humidity == default)
+        {
+            throw new Exception("Missing sensor readings for the specified greenhouse");
+        }
+
+        // Create the prediction request DTO using the latest sensor readings
+        var request = new PredictionRequestDto
+        {
+            Soil_Moisture = soilMoisture,
+            Ambient_Temperature = ambientTemperature,
+            Humidity = humidity
+        };
+
+        // Call the ML API with the constructed request
+        var jsonContent = new StringContent(
+            System.Text.Json.JsonSerializer.Serialize(request),
+            System.Text.Encoding.UTF8,
+            "application/json"
+        );
+
+        var response = await _httpClient.PostAsync(_mlBaseUrl + "predict", jsonContent);
+
+        if (!response.IsSuccessStatusCode)
+        {
+            throw new Exception("Failed to fetch prediction from ML service");
+        }
+
+        // Deserialize the response content directly into PredictionResultDto with case insensitivity
+        var responseContent = await response.Content.ReadAsStringAsync();
+        var result = System.Text.Json.JsonSerializer.Deserialize<PredictionResultDto>(
+            responseContent,
+            new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true }
+        );
+
+        if (result == null)
+        {
+            throw new Exception("Failed to deserialize ML API response into PredictionResultDto");
+        }
+
+        return result;
     }
 }

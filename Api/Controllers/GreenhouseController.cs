@@ -66,4 +66,18 @@ public class GreenhouseController : ControllerBase
         await _greenhouseService.RenameGreenhouse(greenhouse, email);
         return Ok($"Greenhouse has been renamed to {greenhouse.Name}");
     }
+
+    [HttpPost("predict/{greenhouseId}")]
+    [AuthenticateUser]
+    public async Task<ActionResult<PredictionResultDto>> GetPrediction(int greenhouseId)
+    {
+        var email = User.FindFirstValue(ClaimTypes.Email);
+        if (string.IsNullOrEmpty(email))
+        {
+            return Unauthorized("Email claim missing");
+        }
+
+        var result = await _greenhouseService.GetPredictionFromLatestValuesAsync(greenhouseId);
+        return Ok(result);
+    }
 }
