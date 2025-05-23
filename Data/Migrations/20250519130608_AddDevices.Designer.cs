@@ -4,6 +4,7 @@ using Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Data.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250519130608_AddDevices")]
+    partial class AddDevices
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -33,8 +36,9 @@ namespace Data.Migrations
                     b.Property<int>("GreenhouseId")
                         .HasColumnType("int");
 
-                    b.Property<bool>("Status")
-                        .HasColumnType("bit");
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("Timestamp")
                         .HasColumnType("datetime2");
@@ -96,11 +100,11 @@ namespace Data.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("LightingMethod")
+                    b.Property<string>("IpAddress")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("MacAddress")
+                    b.Property<string>("LightingMethod")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -123,18 +127,6 @@ namespace Data.Migrations
                     b.HasIndex("UserEmail");
 
                     b.ToTable("Greenhouses");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            FertilizationMethod = "manual",
-                            LightingMethod = "manual",
-                            MacAddress = "FF:9A:4C:98:6E:17",
-                            Name = "Default Greenhouse",
-                            UserEmail = "bob@smartgrow.nothing",
-                            WateringMethod = "manual"
-                        });
                 });
 
             modelBuilder.Entity("Data.Entities.Preset", b =>
@@ -211,13 +203,6 @@ namespace Data.Migrations
                     b.HasKey("email");
 
                     b.ToTable("Users");
-
-                    b.HasData(
-                        new
-                        {
-                            email = "bob@smartgrow.nothing",
-                            Password = "AQAAAAIAAYagAAAAEDYARcRmYHoWH6vaS2iNLm5nA8hbhelY6ie7l9JZarybfFcBko+tUpqRBRg3m02loQ=="
-                        });
                 });
 
             modelBuilder.Entity("Notification", b =>
