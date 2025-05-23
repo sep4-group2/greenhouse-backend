@@ -1,3 +1,6 @@
+using System.Security.Claims;
+using Api.DTOs;
+using Api.Middleware;
 using Api.Services;
 using Data.Entities;
 using Microsoft.AspNetCore.Mvc;
@@ -13,8 +16,9 @@ public class PresetController : ControllerBase
         _presetService = presetService;
     }
 
+    [AuthenticateUser]
     [HttpPost]
-    public async Task<IActionResult> CreatePreset([FromBody] Preset preset)
+    public async Task<IActionResult> CreatePreset([FromBody] CreatePresetDTO preset)
     {
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
@@ -23,6 +27,7 @@ public class PresetController : ControllerBase
         return CreatedAtAction(nameof(GetPreset), new { id = created.Id }, created);
     }
 
+    [AuthenticateUser]
     [HttpGet("{id}")]
     public async Task<IActionResult> GetPreset(int id)
     {
@@ -33,13 +38,23 @@ public class PresetController : ControllerBase
         return Ok(preset);
     }
 
+    [AuthenticateUser]
     [HttpPut("{id}")]
-    public async Task<IActionResult> UpdatePreset(int id, [FromBody] Preset preset)
+    public async Task<IActionResult> UpdatePreset(int id, [FromBody] UpdatePresetDTO preset)
     {
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
+        
+        //Get user's email using jwt 
+        string email = User.FindFirstValue(ClaimTypes.Email);
+        
+        //If no such user exists, throw an error
+        if (email == null)
+        {
+            throw new Exception("User does not exist");
+        }
 
-        var updated = await _presetService.UpdatePresetAsync(id, preset);
+        var updated = await _presetService.UpdatePresetAsync(id, preset, email);
         if (!updated)
             return NotFound();
 
