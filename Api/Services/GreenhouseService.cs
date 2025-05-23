@@ -101,7 +101,7 @@ public class GreenhouseService
             throw new UnauthorizedAccessException("Greenhouse not found or not paired with this user");
         }
 
-        greenhouse.UserEmail = string.Empty;
+        greenhouse.UserEmail = null;
         greenhouse.User = null;
 
         _dbContext.Greenhouses.Update(greenhouse);
