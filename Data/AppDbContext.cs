@@ -9,14 +9,14 @@ public class AppDbContext : DbContext
     public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
     {
     }
-
+    
     // Add your DbSet properties for your entity classes here
     // public DbSet<YourEntity> YourEntities { get; set; }
-
+    
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
-
+        
         // User-Preset one-to-many (UserPreset)
         modelBuilder.Entity<UserPreset>()
             .HasOne(up => up.User)
@@ -28,6 +28,12 @@ public class AppDbContext : DbContext
             .HasOne(g => g.User)
             .WithMany(u => u.Greenhouses)
             .HasForeignKey(g => g.UserEmail);
+        
+        //User - Device one-to-many
+        modelBuilder.Entity<Device>()
+            .HasOne(d => d.User)
+            .WithMany(u => u.Devices)
+            .HasForeignKey(d => d.UserEmail);
 
         // Greenhouse-Preset one-to-many (ActivePreset)
         modelBuilder.Entity<Greenhouse>()
@@ -137,4 +143,8 @@ public class AppDbContext : DbContext
     public DbSet<Notification> Notifications { get; set; }
 
     public DbSet<Action> Actions { get; set; }
+    public DbSet<Device> Devices { get; set; }
+
+
+ 
 }

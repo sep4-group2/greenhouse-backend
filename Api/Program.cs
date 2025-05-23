@@ -35,9 +35,14 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
 
 builder.Services.AddSingleton<ApiMqttClient>();
+
+builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<GreenhouseService>();
+builder.Services.AddScoped<ConfigurationService>();
+builder.Services.AddScoped<PresetService>();
+
 
 
 builder.Services.AddScoped<ActionService>();
