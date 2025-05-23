@@ -8,6 +8,7 @@ namespace Api.Services;
 public class PresetService
 {
     private readonly AppDbContext _ctx;
+    private readonly ConfigurationService _configuration;
 
     public PresetService(AppDbContext ctx)
     {
@@ -67,6 +68,9 @@ public class PresetService
             throw new Exception("Preset not found");
         }
         
+        //Get greenhouses connected to this preset
+        var greenhouses = await _ctx.Greenhouses.Where(g => g.ActivePresetId == savedPreset.Id ).ToListAsync();
+        
         //Check if it is a system preset
         if (savedPreset.SystemPreset != null)
         {
@@ -91,9 +95,14 @@ public class PresetService
 
         try
         {
-            //Should this send out a notification to all greenhouses connected to it to change?
             _ctx.Presets.Update(savedPreset);
             await _ctx.SaveChangesAsync();
+            
+            //After the preset has been updated in the database, go through all greenhouses connected to it, and update them too
+            greenhouses.ForEach(async g =>
+            {
+                await _configuration.SendConfiguration(savedPreset, g);
+            });
             return true;
         }
         catch (DbUpdateConcurrencyException)
