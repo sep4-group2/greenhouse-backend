@@ -74,15 +74,16 @@ jobs:
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
       
-      - name: Deploy to Container App
+      - name: Deploy to Azure Web App
         uses: azure/CLI@v2
         with:
           inlineScript: |
-            az containerapp update \
-              --name gh-dataconsumer-app75058916 \
+            az webapp config container set \
               --resource-group green-house-rg \
-              --image ghcr.io/${{ github.repository_owner }}/greenhouse-api:${{ github.sha }}
-      
+              --name gh-api-webapp75058916 \
+              --docker-custom-image-name ghcr.io/${{ github.repository_owner }}/greenhouse-api:${{ github.sha }} \
+              --docker-registry-server-url https://ghcr.io
+
       - name: Logout from Azure
         run: |
           az logout
