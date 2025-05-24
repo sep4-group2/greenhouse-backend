@@ -191,8 +191,9 @@ public class GreenhouseService
         if (string.IsNullOrEmpty(email))
             throw new UnauthorizedAccessException("Email claim missing");
         var greenhouse = await _dbContext.Greenhouses.FirstOrDefaultAsync(g => g.Id == greenhouseId);
+        Console.WriteLine($"Greenhouse: {greenhouse?.Name}, Email: {email}");
         if (greenhouse == null || greenhouse.UserEmail != email)
-            throw new UnauthorizedAccessException("Greenhouse not found or not paired with this user");
+            throw new UnauthorizedAccessException("Gresenhouse not found or not paired with this user");
         var preset = await _dbContext.Presets.FirstOrDefaultAsync(p => p.Id == presetId);
         if (preset == null)
             throw new UnauthorizedAccessException("Preset not found or not paired with this user");
@@ -208,6 +209,7 @@ public class GreenhouseService
         if (string.IsNullOrEmpty(email))
             throw new UnauthorizedAccessException("Email claim missing");
         var greenhouse = await _dbContext.Greenhouses.FirstOrDefaultAsync(g => g.Id == greenhouseId);
+        Console.WriteLine($"Greenhouse: {greenhouse?.Name}, Email: {email}");
         if (greenhouse == null || greenhouse.UserEmail != email)
             throw new UnauthorizedAccessException("Greenhouse not found or not paired with this user");
         switch (configuration.Type)
