@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Data.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250520080222_MacAdressGreenhouseAndActionStatusBool")]
-    partial class MacAdressGreenhouseAndActionStatusBool
+    [Migration("20250524103838_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -51,6 +51,37 @@ namespace Data.Migrations
                     b.HasIndex("GreenhouseId");
 
                     b.ToTable("Actions");
+                });
+
+            modelBuilder.Entity("Data.Entities.Device", b =>
+                {
+                    b.Property<int>("DeviceId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("DeviceId"));
+
+                    b.Property<string>("Auth")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Endpoint")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("P256dh")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("UserEmail")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("DeviceId");
+
+                    b.HasIndex("UserEmail");
+
+                    b.ToTable("Devices");
                 });
 
             modelBuilder.Entity("Data.Entities.Greenhouse", b =>
@@ -100,6 +131,7 @@ namespace Data.Migrations
                         new
                         {
                             Id = 1,
+                            ActivePresetId = 1,
                             FertilizationMethod = "manual",
                             LightingMethod = "manual",
                             MacAddress = "FF:9A:4C:98:6E:17",
@@ -150,10 +182,6 @@ namespace Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("SystemPresetId");
-
-                    b.HasIndex("UserPresetId");
-
                     b.ToTable("Presets");
 
                     b.HasData(
@@ -167,7 +195,8 @@ namespace Data.Migrations
                             MinAirHumidity = 40.0,
                             MinSoilHumidity = 30.0,
                             MinTemperature = 18.0,
-                            Name = "Default System Preset"
+                            Name = "Default System Preset",
+                            SystemPresetId = 1
                         });
                 });
 
@@ -308,6 +337,17 @@ namespace Data.Migrations
                     b.Navigation("Greenhouse");
                 });
 
+            modelBuilder.Entity("Data.Entities.Device", b =>
+                {
+                    b.HasOne("Data.Entities.User", "User")
+                        .WithMany("Devices")
+                        .HasForeignKey("UserEmail")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("Data.Entities.Greenhouse", b =>
                 {
                     b.HasOne("Data.Entities.Preset", "ActivePreset")
@@ -324,21 +364,6 @@ namespace Data.Migrations
                     b.Navigation("ActivePreset");
 
                     b.Navigation("User");
-                });
-
-            modelBuilder.Entity("Data.Entities.Preset", b =>
-                {
-                    b.HasOne("SystemPreset", "SystemPreset")
-                        .WithMany()
-                        .HasForeignKey("SystemPresetId");
-
-                    b.HasOne("UserPreset", "UserPreset")
-                        .WithMany()
-                        .HasForeignKey("UserPresetId");
-
-                    b.Navigation("SystemPreset");
-
-                    b.Navigation("UserPreset");
                 });
 
             modelBuilder.Entity("Notification", b =>
@@ -381,7 +406,7 @@ namespace Data.Migrations
             modelBuilder.Entity("SystemPreset", b =>
                 {
                     b.HasOne("Data.Entities.Preset", "Preset")
-                        .WithOne()
+                        .WithOne("SystemPreset")
                         .HasForeignKey("SystemPreset", "Id")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -392,7 +417,7 @@ namespace Data.Migrations
             modelBuilder.Entity("UserPreset", b =>
                 {
                     b.HasOne("Data.Entities.Preset", "Preset")
-                        .WithOne()
+                        .WithOne("UserPreset")
                         .HasForeignKey("UserPreset", "Id")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -420,10 +445,18 @@ namespace Data.Migrations
             modelBuilder.Entity("Data.Entities.Preset", b =>
                 {
                     b.Navigation("Greenhouses");
+
+                    b.Navigation("SystemPreset")
+                        .IsRequired();
+
+                    b.Navigation("UserPreset")
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Data.Entities.User", b =>
                 {
+                    b.Navigation("Devices");
+
                     b.Navigation("Greenhouses");
 
                     b.Navigation("UserPresets");

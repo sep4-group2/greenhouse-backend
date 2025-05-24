@@ -78,17 +78,19 @@ public class AppDbContext : DbContext
             entity.Property("UserId").HasMaxLength(450); // Limit the email length
         });
 
-        // SystemPreset one-to-one with Preset
+// SystemPreset one-to-one with Preset
         modelBuilder.Entity<SystemPreset>()
             .HasOne(sp => sp.Preset)
-            .WithOne()
-            .HasForeignKey<SystemPreset>(sp => sp.Id);
+            .WithOne(p => p.SystemPreset) // Add navigation property to Preset
+            .HasForeignKey<SystemPreset>(sp => sp.Id)
+            .OnDelete(DeleteBehavior.Cascade);
 
-        // UserPreset one-to-one with Preset
+// UserPreset one-to-one with Preset
         modelBuilder.Entity<UserPreset>()
             .HasOne(up => up.Preset)
-            .WithOne()
-            .HasForeignKey<UserPreset>(up => up.Id);
+            .WithOne(p => p.UserPreset) // Add navigation property to Preset
+            .HasForeignKey<UserPreset>(up => up.Id)
+            .OnDelete(DeleteBehavior.Cascade);
 
         // Action
         modelBuilder.Entity<Action>()

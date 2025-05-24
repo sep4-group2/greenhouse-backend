@@ -22,8 +22,10 @@ public class PresetController : ControllerBase
     {
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
+        
+        var email = User.FindFirstValue(ClaimTypes.Email);
 
-        var created = await _presetService.CreatePresetAsync(preset);
+        var created = await _presetService.CreatePresetAsync(preset, email);
         return CreatedAtAction(nameof(GetPreset), new { id = created.Id }, created);
     }
 
@@ -36,6 +38,24 @@ public class PresetController : ControllerBase
             return NotFound();
 
         return Ok(preset);
+    }
+    
+    //get all presets for the user
+    [AuthenticateUser]
+    [HttpGet("all")]
+    public async Task<IActionResult> GetAllPresets()
+    {
+        // Get user's email using JWT
+        string? email = User.FindFirstValue(ClaimTypes.Email);
+
+        // If no such user exists, return unauthorized
+        if (string.IsNullOrEmpty(email))
+        {
+            return Unauthorized("User does not exist");
+        }
+
+        var presets = await _presetService.GetAllPresetsAsync(email);
+        return Ok(presets);
     }
 
     [AuthenticateUser]

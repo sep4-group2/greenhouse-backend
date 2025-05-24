@@ -128,6 +128,7 @@ namespace Data.Migrations
                         new
                         {
                             Id = 1,
+                            ActivePresetId = 1,
                             FertilizationMethod = "manual",
                             LightingMethod = "manual",
                             MacAddress = "FF:9A:4C:98:6E:17",
@@ -178,10 +179,6 @@ namespace Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("SystemPresetId");
-
-                    b.HasIndex("UserPresetId");
-
                     b.ToTable("Presets");
 
                     b.HasData(
@@ -195,7 +192,8 @@ namespace Data.Migrations
                             MinAirHumidity = 40.0,
                             MinSoilHumidity = 30.0,
                             MinTemperature = 18.0,
-                            Name = "Default System Preset"
+                            Name = "Default System Preset",
+                            SystemPresetId = 1
                         });
                 });
 
@@ -365,21 +363,6 @@ namespace Data.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("Data.Entities.Preset", b =>
-                {
-                    b.HasOne("SystemPreset", "SystemPreset")
-                        .WithMany()
-                        .HasForeignKey("SystemPresetId");
-
-                    b.HasOne("UserPreset", "UserPreset")
-                        .WithMany()
-                        .HasForeignKey("UserPresetId");
-
-                    b.Navigation("SystemPreset");
-
-                    b.Navigation("UserPreset");
-                });
-
             modelBuilder.Entity("Notification", b =>
                 {
                     b.HasOne("Data.Entities.Greenhouse", "Greenhouse")
@@ -420,7 +403,7 @@ namespace Data.Migrations
             modelBuilder.Entity("SystemPreset", b =>
                 {
                     b.HasOne("Data.Entities.Preset", "Preset")
-                        .WithOne()
+                        .WithOne("SystemPreset")
                         .HasForeignKey("SystemPreset", "Id")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -431,7 +414,7 @@ namespace Data.Migrations
             modelBuilder.Entity("UserPreset", b =>
                 {
                     b.HasOne("Data.Entities.Preset", "Preset")
-                        .WithOne()
+                        .WithOne("UserPreset")
                         .HasForeignKey("UserPreset", "Id")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -459,6 +442,12 @@ namespace Data.Migrations
             modelBuilder.Entity("Data.Entities.Preset", b =>
                 {
                     b.Navigation("Greenhouses");
+
+                    b.Navigation("SystemPreset")
+                        .IsRequired();
+
+                    b.Navigation("UserPreset")
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Data.Entities.User", b =>

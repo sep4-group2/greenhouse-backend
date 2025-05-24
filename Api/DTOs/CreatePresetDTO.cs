@@ -18,10 +18,11 @@ public class CreatePresetDTO
     
     [Required]
     public double MaxAirHumidity { get; set; }
-    public double MinSoilHumidity { get; set; }
-    public double MaxSoilHumidity { get; set; }
-    public int HoursOfLight { get; set; }
     [Required]
-    public string UserEmail { get; set; }
+    public double MinSoilHumidity { get; set; }
+    [Required]
+    public double MaxSoilHumidity { get; set; }
+    [Required]
+    public int HoursOfLight { get; set; }
     
 }

@@ -10,9 +10,10 @@ public class PresetService
     private readonly AppDbContext _ctx;
     private readonly ConfigurationService _configuration;
 
-    public PresetService(AppDbContext ctx)
+    public PresetService(AppDbContext ctx, ConfigurationService configuration)
     {
         _ctx = ctx;
+        _configuration = configuration;
     }
 
     public async Task<Preset?> GetPresetAsync(int id)
@@ -20,15 +21,15 @@ public class PresetService
         return await _ctx.Presets.FindAsync(id);
     }
 
-    public async Task<Preset> CreatePresetAsync(CreatePresetDTO preset)
+    public async Task<Preset> CreatePresetAsync(CreatePresetDTO preset, string userEmail)
     {
-        //Check if user preset is null, if it is, throw an error
-        if (preset.UserEmail == null)
+        // Check if user preset is null, if it is, throw an error
+        if (userEmail == null)
         {
             throw new Exception("User preset cannot be null");
         }
-        
-        var createdPreset = _ctx.Presets.Add(new Preset()
+
+        var createdPreset = _ctx.Presets.Add(new Preset
         {
             HoursOfLight = preset.HoursOfLight,
             MaxAirHumidity = preset.MaxAirHumidity,
@@ -37,20 +38,27 @@ public class PresetService
             MinAirHumidity = preset.MinAirHumidity,
             MinSoilHumidity = preset.MinSoilHumidity,
             MinTemperature = preset.MinTemperature,
-            Name = preset.Name,
-        });
-        
-        //If not null, save the user preset
-        _ctx.UserPresets.Add(new UserPreset()
-        {
-            UserEmail = preset.UserEmail,
-            Preset = createdPreset.Entity
+            Name = preset.Name
         });
         
         await _ctx.SaveChangesAsync();
         
-        Preset result = await _ctx.Presets.FindAsync(createdPreset.Entity.Id);
-        
+        // If not null, save the user preset
+        _ctx.UserPresets.Add(new UserPreset
+        {
+            UserEmail = userEmail,
+            Preset = createdPreset.Entity
+        });
+
+        await _ctx.SaveChangesAsync();
+
+        var result = await _ctx.Presets.FindAsync(createdPreset.Entity.Id);
+
+        if (result == null)
+        {
+            throw new Exception("Failed to create preset");
+        }
+
         return result;
     }
 
@@ -132,5 +140,23 @@ public class PresetService
         _ctx.Presets.Remove(preset);
         await _ctx.SaveChangesAsync();
         return true;
+    }
+
+    public async Task<IEnumerable<Preset>> GetAllPresetsAsync(string userEmail)
+    {
+        // Fetch system presets
+        var systemPresets = await _ctx.Presets
+            .Include(p => p.SystemPreset)
+            .Where(p => p.SystemPreset != null)
+            .ToListAsync();
+
+        // Fetch user-specific presets
+        var userPresets = await _ctx.Presets
+            .Include(p => p.UserPreset)
+            .Where(p => p.UserPreset != null && p.UserPreset.UserEmail == userEmail)
+            .ToListAsync();
+
+        // Combine both lists
+        return systemPresets.Concat(userPresets);
     }
 }
