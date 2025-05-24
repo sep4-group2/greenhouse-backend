@@ -70,8 +70,6 @@ try
     var optionsBuilder = new DbContextOptionsBuilder<AppDbContext>();
     optionsBuilder.UseSqlServer(connectionString);
     var dbContext = new AppDbContext(optionsBuilder.Options);
-    using (dbContext)
-    {
         // This will verify if we can connect to the database
         bool canConnect = dbContext.Database.CanConnect();
 
@@ -85,7 +83,6 @@ try
         {
             Console.WriteLine("Failed to connect to the database.");
         }
-    }
     
     var sensorService = new SensorService(dbContext, new SensorReadingValidator(dbContext));
     var actionService= new ActionService( dbContext);

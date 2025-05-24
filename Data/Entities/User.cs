@@ -12,4 +12,5 @@ public class User
     public ICollection<Greenhouse> Greenhouses { get; set; }
     public ICollection<UserPreset> UserPresets { get; set; }
     public ICollection<Notification> Notifications { get; set; }
+    public ICollection<Device> Devices { get; set; }
 }

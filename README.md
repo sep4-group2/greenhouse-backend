@@ -11,7 +11,7 @@ This repository contains the backend services for the greenhouse monitoring and 
 
 ## 🚀 Running the Project
 
-There are two main ways to run this project:
+There are three main ways to run this project:
 
 ### Option 1: Full Docker Deployment 🐳
 
@@ -31,7 +31,29 @@ This will start:
 - 🖥️ API service on port 5050 (http://localhost:5050)
 - 📊 Data Consumer service
 
-### Option 2: Infrastructure in Docker + Services in IDE 💻
+### Option 2: Full Docker Deployment with Simulator 🌿
+
+This option runs all components including a simulator for frontend development:
+
+1. Make sure you have Docker and Docker Compose installed
+2. Clone the repository
+3. Run the following command from the repository root:
+
+```sh
+docker compose --profile full-simulator up -d --build
+```
+
+This will start all services from Option 1 plus:
+- 🔄 Greenhouse simulator that generates realistic sensor data
+- All services run in detached mode with freshly built images
+
+For frontend development, a default user is seeded in the database:
+- 👤 Email: bob@smartgrow.nothing
+- 🔑 Password: password
+
+This user account is always available but is especially useful with the simulator option as it provides access to generated greenhouse data.
+
+### Option 3: Infrastructure in Docker + Services in IDE 💻
 
 This option runs the infrastructure (database and MQTT) in Docker while running the API and Data Consumer in your IDE for development:
 
@@ -89,7 +111,7 @@ The Azure integration is automatically enabled when the environment is "Producti
 
 ## 🔄 Development Workflow
 
-1. Make your code changes in Rider using Option 2 (Development Configuration)
+1. Make your code changes in Rider using Option 3 (Development Configuration)
 2. Test locally using the Docker infrastructure
 3. When ready, commit changes and push to trigger CI/CD pipeline
 4. The pipeline will build, test, and deploy the services to Azure

@@ -28,8 +28,8 @@ public static class TestPublisher
                 Value = 24.6,
                 Unit = "C",
                 Timestamp = DateTime.UtcNow,
-                GreenhouseId = 1,
-                Greenhouse = null // can be omitted or set to null
+                GreenhouseId = 1
+                // Don't set Greenhouse to null explicitly
             };
 
             string json = JsonSerializer.Serialize(testReading);

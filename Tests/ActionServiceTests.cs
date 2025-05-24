@@ -2,6 +2,7 @@ using Api.Services;
 using Data.Entities;
 using Tests.Helpers;
 using Action = Data.Entities.Action;
+using Api.Clients;
 
 namespace Tests
 {
@@ -23,7 +24,7 @@ namespace Tests
             var greenhouse = new Greenhouse
             {
                 Name = "GH1",
-                IpAddress = "192.168.0.10",
+                MacAddress = "192.168.0.10",
                 LightingMethod = "LED",
                 WateringMethod = "Auto",
                 FertilizationMethod = "Auto",
@@ -41,21 +42,21 @@ namespace Tests
                 new Action
                 {
                     Type = "Irrigation",
-                    Status = "Success",
+                    Status = true,
                     Timestamp = now.AddMinutes(-30),
                     GreenhouseId = greenhouseId
                 },
                 new Action
                 {
                     Type = "Ventilation",
-                    Status = "Failed",
+                    Status = false,
                     Timestamp = now.AddHours(-1),
                     GreenhouseId = greenhouseId
                 },
                 new Action
                 {
                     Type = "Lighting",
-                    Status = "Success",
+                    Status = true,
                     Timestamp = now.AddDays(-2),
                     GreenhouseId = greenhouseId
                 }
@@ -63,7 +64,10 @@ namespace Tests
 
             await dbContext.SaveChangesAsync();
 
-            var service = new ActionService(dbContext);
+            // Create a test MQTT client
+            var testMqttClient = new TestApiMqttClient();
+            
+            var service = new ActionService(dbContext, testMqttClient);
 
             // Act
             var result = await service.PrepareActionsForPeriodAsync(

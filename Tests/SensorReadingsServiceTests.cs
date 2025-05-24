@@ -27,7 +27,7 @@ namespace Tests
             var greenhouse = new Greenhouse
             {
                 Name = "GH Test",
-                IpAddress = "192.168.0.1",
+                MacAddress = "192.168.0.1",
                 LightingMethod = "LED",
                 WateringMethod = "auto",
                 FertilizationMethod = "manual",

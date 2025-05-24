@@ -27,7 +27,7 @@ services:
       - ./mosquitto/log:/mosquitto/log
       
   api:
-    profiles: ["full"]
+    profiles: ["full", "full-simulator"]
     build:
       context: .
       dockerfile: Api/Dockerfile
@@ -37,11 +37,12 @@ services:
       - "5050:8080"
     depends_on:
       - db
+      - mqtt
     environment:
       - ASPNETCORE_ENVIRONMENT=LocalDocker
       
   dataconsumer:
-    profiles: ["full"]
+    profiles: ["full", "full-simulator"]
     build:
       context: .
       dockerfile: DataConsumer/Dockerfile
@@ -50,10 +51,37 @@ services:
     depends_on:
       - db
       - mqtt
+      - api
     environment:
       - MQTT__Host=mqtt
       - MQTT__Port=1883
       - DOTNET_ENVIRONMENT=LocalDocker
+
+  mqtt-simulator:
+    profiles: ["full-simulator"]
+    build:
+      context: .
+      dockerfile: IoTSimulator/Dockerfile
+    container_name: greenhouse_simulator
+    restart: always
+    depends_on:
+      - db
+      - mqtt
+      - api
+      - dataconsumer  
+    environment:
+      - MQTT_HOST=mqtt
+      - MQTT_PORT=1883
+      - SENSOR_INTERVAL=60
+
+  mal-api:
+    image: ghcr.io/sep4-group2/mal-api:latest
+    container_name: mal_api_service
+    restart: always
+    ports:
+      - "1337:1337"
+    environment:
+      - PORT=1337
 
 volumes:
   mssql_data:

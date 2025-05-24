@@ -110,6 +110,7 @@ public class SimpleMqttClient
     
     private async Task HandleMessage(string topic, string message)
     {
+        Console.WriteLine($"Handling message on topic '{topic}': {message}");
         if (topic == "greenhouse/sensor")
         {
             await _sensorService.HandleSensorData(message);

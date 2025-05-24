@@ -12,3 +12,6 @@ riderModule.iml
 /mosquitto/config/*
 # Except the configuration file
 !/mosquitto/config/mosquitto.conf
+
+#Some generated files
+*.DotSettings.user

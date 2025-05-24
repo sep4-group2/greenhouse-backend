@@ -1,6 +1,7 @@
 
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
 namespace Data.Entities;
 public class Preset
@@ -28,8 +29,9 @@ public class Preset
 
     public ICollection<Greenhouse> Greenhouses { get; set; }
 
-    public SystemPreset SystemPreset { get; set; }
-    public UserPreset UserPreset { get; set; }
-    public int? SystemPresetId { get; set; }
-    public int? UserPresetId { get; set; }
+    [JsonIgnore]
+    public SystemPreset? SystemPreset { get; set; }
+    
+    [JsonIgnore]
+    public UserPreset? UserPreset { get; set; }
 }

@@ -1,4 +1,6 @@
+using System.Security.Claims;
 using Api.DTOs;
+using Api.Middleware;
 using Api.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -19,7 +21,7 @@ public class ActionController : ControllerBase
 
     [HttpPost("{greenhouseId}/past-actions")]
     public async Task<IActionResult> GetActionHistoryAsync(
-        [FromRoute] int greenhouseId, 
+        [FromRoute] int greenhouseId,
         [FromBody] ActionQueryDTO query)
     {
         try
@@ -32,5 +34,14 @@ public class ActionController : ControllerBase
             _logger.LogError($"Error fetching actions for greenhouse {greenhouseId}: {ex.Message}");
             return StatusCode(500, "Internal server error");
         }
+    }
+
+    [HttpPost("{greenhouseId}/triggerAction")]
+    [AuthenticateUser]
+    public async Task<IActionResult> TriggerAction([FromRoute] int greenhouseId, [FromBody] string actionType)
+    {
+        var email = User.FindFirstValue(ClaimTypes.Email);
+        await _service.TriggerAction(email, greenhouseId, actionType);
+        return Ok($"Action {actionType} triggered");
     }
 }
