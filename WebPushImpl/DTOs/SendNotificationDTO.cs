@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace Api.DTOs;
+namespace WebPushImpl.DTOs;
 
 public class SendNotificationDTO
 {

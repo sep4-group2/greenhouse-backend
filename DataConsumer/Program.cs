@@ -8,6 +8,8 @@ using Azure.Identity;
 using Azure.Security.KeyVault.Secrets;
 using DataConsumer.Service;
 using DataConsumer.Services;
+using WebPushImpl.Services;
+using Microsoft.Extensions.Logging;
 
 // Set up configuration
 var environment = Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT") ?? "Release";
@@ -84,8 +86,21 @@ try
             Console.WriteLine("Failed to connect to the database.");
         }
     
-    var sensorService = new SensorService(dbContext, new SensorReadingValidator(dbContext));
-    var actionService= new ActionService( dbContext);
+    // Set up logging
+    using var loggerFactory = LoggerFactory.Create(builder =>
+        builder.AddConsole()
+               .SetMinimumLevel(LogLevel.Information));
+    
+    var validatorLogger = loggerFactory.CreateLogger<SensorReadingValidator>();
+    var notificationLogger = loggerFactory.CreateLogger<NotificationService>();
+    
+    // Create notification service
+    var notificationService = new NotificationService(configuration, dbContext, notificationLogger);
+    
+    // Create services with dependencies
+    var sensorReadingValidator = new SensorReadingValidator(dbContext, notificationService, validatorLogger);
+    var sensorService = new SensorService(dbContext, sensorReadingValidator);
+    var actionService = new ActionService(dbContext);
     // Create and use the simple MQTT client
     var mqttClient = new SimpleMqttClient(configuration, dbContext, sensorService, actionService);
     await mqttClient.ConnectAndKeepAlive();

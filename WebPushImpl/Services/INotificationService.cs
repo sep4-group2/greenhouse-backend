@@ -1,6 +1,6 @@
-using Api.DTOs;
+using WebPushImpl.DTOs;
 
-namespace Api.Services;
+namespace WebPushImpl.Services;
 
 public interface INotificationService
 {

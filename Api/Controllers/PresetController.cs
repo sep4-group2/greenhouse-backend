@@ -84,7 +84,8 @@ public class PresetController : ControllerBase
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeletePreset(int id)
     {
-        var deleted = await _presetService.DeletePresetAsync(id);
+        var email = User.FindFirstValue(ClaimTypes.Email);
+        var deleted = await _presetService.DeletePresetAsync(id, email);
         if (!deleted)
             return NotFound();
 

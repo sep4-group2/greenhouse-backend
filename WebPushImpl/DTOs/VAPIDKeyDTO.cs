@@ -1,4 +1,4 @@
-namespace Api.DTOs;
+namespace WebPushImpl.DTOs;
 
 public class VAPIDKeyDTO
 {

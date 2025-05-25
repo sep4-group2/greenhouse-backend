@@ -131,7 +131,7 @@ public class AppDbContext : DbContext
             WateringMethod = "manual",
             LightingMethod = "manual",
             FertilizationMethod = "manual",
-            MacAddress = "FF:9A:4C:98:6E:17",
+            MacAddress = "fc:f5:c4:87:00:24",
             UserEmail = "bob@smartgrow.nothing",
             ActivePresetId = 1,
         });

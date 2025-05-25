@@ -2,16 +2,23 @@ using Data;
 using Data.Entities;
 using Data.Utils;
 using Microsoft.EntityFrameworkCore;
+using WebPushImpl.Services;
+using WebPushImpl.DTOs;
+using Microsoft.Extensions.Logging;
 
 namespace DataConsumer.Services;
 
 public class SensorReadingValidator
 {
     private readonly AppDbContext _dbContext;
+    private readonly INotificationService _notificationService;
+    private readonly ILogger<SensorReadingValidator> _logger;
 
-    public SensorReadingValidator(AppDbContext dbContext)
+    public SensorReadingValidator(AppDbContext dbContext, INotificationService notificationService, ILogger<SensorReadingValidator> logger)
     {
         _dbContext = dbContext;
+        _notificationService = notificationService;
+        _logger = logger;
     }
 
     public async Task ValidateAndTriggerAsync(SensorReading reading)
@@ -33,8 +40,30 @@ public class SensorReadingValidator
 
         Console.WriteLine($"Out-of-range reading detected: {reading.Type} = {reading.Value}");
 
+        // Send push notification to user
+        try
+        {
+            var notificationMessage = $"{reading.Type} reading of {reading.Value} is out of range.";
+            
+            await _notificationService.SendNotification(new SendNotificationDTO
+            {
+                userEmail = greenhouse.UserEmail,
+                GreenhouseId = reading.GreenhouseId,
+                notification = new NotificationDTO
+                {
+                    title = $"Alert: {greenhouse.Name}",
+                    message = notificationMessage
+                }
+            });
+            
+            _logger.LogInformation($"Push notification sent to {greenhouse.UserEmail} for greenhouse {greenhouse.Name}");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, $"Failed to send push notification to {greenhouse.UserEmail}");
+        }
 
-        //TODO should be passed to notification server
+        // Save notification to database as backup
         var notification = new Notification
         {
             Content = $"{reading.Type} reading of {reading.Value} is out of range.",
