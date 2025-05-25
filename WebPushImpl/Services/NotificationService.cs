@@ -1,11 +1,13 @@
 using System.Text.Json;
-using Api.DTOs;
+using WebPushImpl.DTOs;
 using Data;
 using Data.Entities;
 using WebPush;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Configuration;
 
-namespace Api.Services;
+namespace WebPushImpl.Services;
 
 public class NotificationService: INotificationService
 {
@@ -50,7 +52,7 @@ public class NotificationService: INotificationService
         foreach (Device device in devices)
         {
             //Create a subscription for each device connected to the user
-            PushSubscription subscription = new PushSubscription(device.Endpoint, device.P256dh, device.UserEmail);
+            PushSubscription subscription = new PushSubscription(device.Endpoint, device.P256dh, device.Auth);
             Dictionary<string, object> options = new Dictionary<string, object>();
             options["vapidDetails"] = new VapidDetails($"mailto:{device.UserEmail}", _configuration.GetValue<string>("VAPIDKeys:PublicKey"), _configuration.GetValue<string>("VAPIDKeys:PrivateKey"));
             WebPushClient client = new WebPushClient();

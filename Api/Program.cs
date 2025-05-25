@@ -7,6 +7,7 @@ using Api.Services;
 using Azure.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using WebPushImpl.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 

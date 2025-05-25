@@ -15,7 +15,6 @@ public class SimpleMqttClient
     private readonly IMqttClient _client;
     private readonly MqttClientOptions _options;
     private readonly AppDbContext _dbContext;
-    private readonly SensorReadingValidator _validator;
     private readonly SensorService _sensorService;
     private readonly ActionService _actionService;
 
@@ -25,7 +24,6 @@ public class SimpleMqttClient
         var port = int.Parse(configuration["MQTT:Port"] ?? "1883");
         
         _dbContext = dbContext;
-        _validator = new SensorReadingValidator(dbContext);
         _sensorService = sensorService;
         _actionService = actionService;
             

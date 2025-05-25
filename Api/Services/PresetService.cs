@@ -121,22 +121,35 @@ public class PresetService
         }
     }
 
-    public async Task<bool> DeletePresetAsync(int id)
+    public async Task<bool> DeletePresetAsync(int id, string userEmail)
     {
-        var preset = await _ctx.Presets.FindAsync(id);
-        
-        //Check if the preset is connected to any greenhouses
-        var connectedGreenhouses = await _ctx.Greenhouses.Where(g => g.ActivePresetId == id).ToListAsync();
-
-        //If it is it cannot be deleted
-        if (connectedGreenhouses != null || connectedGreenhouses.Count > 0)
+        var preset = await _ctx.Presets
+            .Include(p => p.UserPreset)
+            .Include(p => p.SystemPreset)
+            .FirstOrDefaultAsync(p => p.Id == id);
+    
+        if (preset == null)
+            return false;
+    
+        // Check if it's a system preset
+        if (preset.SystemPreset != null)
+        {
+            throw new Exception("Cannot delete system preset");
+        }
+    
+        // Check if preset belongs to requesting user
+        if (preset.UserPreset?.UserEmail != userEmail)
+        {
+            throw new Exception("Cannot delete preset belonging to other users");
+        }
+    
+        // Check if connected to greenhouses
+        var isConnected = await _ctx.Greenhouses.AnyAsync(g => g.ActivePresetId == id);
+        if (isConnected)
         {
             throw new Exception("Cannot delete preset currently in use");
         }
-        
-        if (preset == null)
-            return false;
-
+    
         _ctx.Presets.Remove(preset);
         await _ctx.SaveChangesAsync();
         return true;
