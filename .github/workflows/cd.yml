@@ -80,7 +80,7 @@ jobs:
           inlineScript: |
             az webapp config container set \
               --resource-group green-house-rg \
-              --name gh-api-webapp75058916 \
+              --name gh-mal-api-webapp310526aa \
               --docker-custom-image-name ghcr.io/${{ github.repository_owner }}/greenhouse-api:${{ github.sha }} \
               --docker-registry-server-url https://ghcr.io
 
