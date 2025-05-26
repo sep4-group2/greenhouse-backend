@@ -73,6 +73,7 @@ public class NotificationController: ControllerBase
         }
     }
     
+    [AuthenticateUser]
     [HttpPost("{greenhouseId}/past-notifications")]
     public async Task<IActionResult> GetNotificationHistoryAsync(
         [FromRoute] int greenhouseId, 

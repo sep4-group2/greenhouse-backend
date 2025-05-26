@@ -19,6 +19,7 @@ public class ActionController : ControllerBase
         _logger = logger;
     }
 
+    [AuthenticateUser]
     [HttpPost("{greenhouseId}/past-actions")]
     public async Task<IActionResult> GetActionHistoryAsync(
         [FromRoute] int greenhouseId,

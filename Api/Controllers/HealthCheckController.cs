@@ -1,3 +1,4 @@
+using Api.Middleware;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Controllers;
@@ -6,6 +7,7 @@ namespace Api.Controllers;
 [Route("api/[controller]")]
 public class HealthCheckController : ControllerBase
 {
+    [AuthenticateUser]
     [HttpGet]
     public IActionResult Get()
     {

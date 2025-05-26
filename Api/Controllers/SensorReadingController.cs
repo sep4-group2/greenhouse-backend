@@ -1,4 +1,5 @@
 using Api.DTOs;
+using Api.Middleware;
 using Api.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -20,6 +21,7 @@ public class SensorReadingController : ControllerBase
         _logger = logger;
     }
 
+    [AuthenticateUser]
     [HttpGet("{greenhouseId}/past-sensor-readings/")]
     public async Task<IActionResult> GetPastSensorReadingsAsync(
         [FromRoute] int greenhouseId,
@@ -45,6 +47,7 @@ public class SensorReadingController : ControllerBase
         }
     }
 
+    [AuthenticateUser]
     [HttpGet("{greenhouseId}/current-sensor-readings/")]
     public async Task<IActionResult> GetCurrentSensorReadingsAsync([FromRoute] int greenhouseId)
     {
