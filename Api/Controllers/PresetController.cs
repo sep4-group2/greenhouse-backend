@@ -81,6 +81,7 @@ public class PresetController : ControllerBase
         return NoContent();
     }
 
+    [AuthenticateUser]
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeletePreset(int id)
     {
