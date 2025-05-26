@@ -17,6 +17,29 @@ public class GreenhouseController : ControllerBase
         _greenhouseService = greenhouseService;
     }
     
+    [HttpGet()]
+    [AuthenticateUser]
+    public async Task<ActionResult<List<GreenhouseDto>>> GetAllGreenhouses()
+    {
+        var email = User.FindFirstValue(ClaimTypes.Email);
+        
+        var greenhouses = await _greenhouseService.GetAllGreenhousesForUser(email!);
+        
+        // map it to DTOs
+        return greenhouses.Select(g => new GreenhouseDto
+        {
+            Id = g.Id,
+            Name = g.Name,
+            MacAddress = g.MacAddress,
+            LightingMethod = g.LightingMethod,
+            WateringMethod = g.WateringMethod,
+            FertilizationMethod = g.FertilizationMethod,
+            UserEmail = g.UserEmail,
+            ActivePresetId = g.ActivePresetId,
+            ActivePresetName = g.ActivePreset?.Name
+        }).ToList();
+    }
+    
     [HttpPost("pair")]
     [AuthenticateUser]
     public async Task<ActionResult> PairGreenhouse([FromBody] GreenhousePairDto greenhousePair)
@@ -42,5 +65,38 @@ public class GreenhouseController : ControllerBase
         var email = User.FindFirstValue(ClaimTypes.Email);
         await _greenhouseService.RenameGreenhouse(greenhouse, email);
         return Ok($"Greenhouse has been renamed to {greenhouse.Name}");
+    }
+
+    [HttpPut("preset/{greenhouseId}")]
+    [AuthenticateUser]
+    public async Task<ActionResult> SetPresetToGreenhouse([FromRoute] int greenhouseId, [FromBody] int presetId)
+    {
+        var email = User.FindFirstValue(ClaimTypes.Email);
+        await _greenhouseService.SetPresetToGreenhouse(greenhouseId, presetId, email);
+        return Ok($"Preset with id {presetId} has been set to greenhouse {greenhouseId}");
+    }
+
+    [HttpPut("configure/{greenhouseId}")]
+    [AuthenticateUser]
+    public async Task<ActionResult> SetConfigurationForGreenhouse([FromRoute] int greenhouseId,
+        [FromBody] ConfigurationDto configuration)
+    {
+        var email = User.FindFirstValue(ClaimTypes.Email);
+        await _greenhouseService.SetConfigurationForGreenhouse(email, greenhouseId, configuration);
+        return Ok($"{configuration.Type} has been set to {configuration.Type}");
+    }
+
+    [HttpPost("predict/{greenhouseId}")]
+    [AuthenticateUser]
+    public async Task<ActionResult<PredictionResultDto>> GetPrediction(int greenhouseId)
+    {
+        var email = User.FindFirstValue(ClaimTypes.Email);
+        if (string.IsNullOrEmpty(email))
+        {
+            return Unauthorized("Email claim missing");
+        }
+
+        var result = await _greenhouseService.GetPredictionFromLatestValuesAsync(greenhouseId);
+        return Ok(result);
     }
 }

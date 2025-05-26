@@ -7,6 +7,9 @@ using Data.Utils;
 using Microsoft.EntityFrameworkCore;
 using Tests.Helpers;
 using Xunit;
+using Microsoft.Extensions.Logging;
+using Moq;
+using WebPushImpl.Services;
 
 namespace Tests
 {
@@ -28,7 +31,7 @@ namespace Tests
             var greenhouse = new Greenhouse
             {
                 Name = "Test Greenhouse",
-                IpAddress = "192.168.1.10",
+                MacAddress = "192.168.1.10",
                 LightingMethod = "bulb",
                 WateringMethod = "auto",
                 FertilizationMethod = "auto",
@@ -48,7 +51,11 @@ namespace Tests
                 GreenhouseId = greenhouseId
             };
 
-            var validator = new SensorReadingValidator(dbContext);
+            // Create mocks for dependencies
+            var mockNotificationService = new Mock<INotificationService>();
+            var mockLogger = new Mock<ILogger<SensorReadingValidator>>();
+
+            var validator = new SensorReadingValidator(dbContext, mockNotificationService.Object, mockLogger.Object);
 
             // Act
             await validator.ValidateAndTriggerAsync(reading);
@@ -56,7 +63,10 @@ namespace Tests
             // Assert
             var notifications = await dbContext.Notifications.ToListAsync();
             Assert.Single(notifications);
-            Assert.Equal(1, notifications[0].GreenhouseId);
+            Assert.Equal(2, notifications[0].GreenhouseId); // Because one is already seeded at this point 
+            
+            // Verify that push notification was sent
+            mockNotificationService.Verify(x => x.SendNotification(It.IsAny<WebPushImpl.DTOs.SendNotificationDTO>()), Times.Once); 
         }
     }
 }

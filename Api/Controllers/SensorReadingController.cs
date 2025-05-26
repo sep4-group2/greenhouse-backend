@@ -1,4 +1,5 @@
 using Api.DTOs;
+using Api.Middleware;
 using Api.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -11,35 +12,51 @@ public class SensorReadingController : ControllerBase
     private readonly SensorReadingsService _sensorReadingsService;
     private readonly ILogger<SensorReadingController> _logger;
 
-    public SensorReadingController(SensorReadingsService sensorReadingsService, ILogger<SensorReadingController> logger)
+    public SensorReadingController(
+        SensorReadingsService sensorReadingsService,
+        ILogger<SensorReadingController> logger
+    )
     {
         _sensorReadingsService = sensorReadingsService;
         _logger = logger;
     }
-    
+
+    [AuthenticateUser]
     [HttpGet("{greenhouseId}/past-sensor-readings/")]
-    public async Task<IActionResult> GetPastSensorReadingsAsync([FromRoute] int greenhouseId, [FromQuery] PastSensorReadingRequestDTO? pastDataRequest)
+    public async Task<IActionResult> GetPastSensorReadingsAsync(
+        [FromRoute] int greenhouseId,
+        [FromQuery] PastSensorReadingRequestDTO? pastDataRequest
+    )
     {
         try
         {
-            var result =
-                _sensorReadingsService.PreparePastSensorReadingsAsync(greenhouseId, pastDataRequest);
-            
+            var result = await _sensorReadingsService.PreparePastSensorReadingsAsync(
+                greenhouseId,
+                pastDataRequest
+            );
+
             return Ok(result);
         }
         catch (Exception e)
         {
-            _logger.LogError($"Something went wrong while getting old data from the database for greenhouse {greenhouseId}: {e.Message}");
+            _logger.LogError(
+                $"Something went wrong while getting old data from the database for greenhouse {greenhouseId}: {e.Message}"
+            );
+
             return StatusCode(500);
         }
     }
-    
+
+    [AuthenticateUser]
     [HttpGet("{greenhouseId}/current-sensor-readings/")]
     public async Task<IActionResult> GetCurrentSensorReadingsAsync([FromRoute] int greenhouseId)
     {
         try
         {
-            var result = await _sensorReadingsService.PrepareCurrentSensorReadingsAsync(greenhouseId);
+            var result = await _sensorReadingsService.PrepareCurrentSensorReadingsAsync(
+                greenhouseId
+            );
+
             return Ok(result);
         }
         catch (Exception ex)

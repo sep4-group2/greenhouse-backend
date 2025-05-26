@@ -8,6 +8,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataConsumer", "DataConsume
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tests", "Tests\Tests.csproj", "{3447DE2E-88FA-425D-87B8-B468C4923EE4}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebPushImpl", "WebPushImpl\WebPushImpl.csproj", "{514D5DE8-DA69-4306-9D59-BA9C324B50BF}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -30,5 +32,9 @@ Global
 		{3447DE2E-88FA-425D-87B8-B468C4923EE4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3447DE2E-88FA-425D-87B8-B468C4923EE4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3447DE2E-88FA-425D-87B8-B468C4923EE4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{514D5DE8-DA69-4306-9D59-BA9C324B50BF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{514D5DE8-DA69-4306-9D59-BA9C324B50BF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{514D5DE8-DA69-4306-9D59-BA9C324B50BF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{514D5DE8-DA69-4306-9D59-BA9C324B50BF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

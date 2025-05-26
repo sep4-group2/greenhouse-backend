@@ -7,16 +7,16 @@ public class Greenhouse
 {
     public int Id { get; set; }
     public string Name { get; set; }
-    public string IpAddress { get; set; }
+    public string MacAddress { get; set; }
     public string LightingMethod { get; set; }
     public string WateringMethod { get; set; }
     public string FertilizationMethod { get; set; }
 
-    [Required]
-    public string UserEmail { get; set; }
+    // Allow nullable UserEmail for unpairing
+    public string? UserEmail { get; set; }
     
     [ForeignKey("UserEmail")]
-    public User User { get; set; }
+    public User? User { get; set; }
 
     public int? ActivePresetId { get; set; }
     [ForeignKey("ActivePresetId")]

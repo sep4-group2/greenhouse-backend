@@ -1,5 +1,5 @@
-
 using System.Text;
+using Api.Clients;
 using Data.Entities;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
@@ -7,6 +7,7 @@ using Api.Services;
 using Azure.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using WebPushImpl.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -28,27 +29,52 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 // Add services to the container.
 builder.Services.AddAuthorization();
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
+        options.JsonSerializerOptions.WriteIndented = true;
+    });
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
 
+builder.Services.AddSingleton<ApiMqttClient>();
 
+builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<GreenhouseService>();
+builder.Services.AddScoped<ConfigurationService>();
+builder.Services.AddScoped<PresetService>();
+
 
 
 builder.Services.AddScoped<ActionService>();
 builder.Services.AddScoped<SensorReadingsService>();
 
+builder.Services.AddHttpClient();
+
+// Add CORS policy
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll", policy =>
+    {
+        policy.AllowAnyOrigin()
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
+});
 
 // Add database context
 builder.Services.AddDbContext<Data.AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 var app = builder.Build();
+
+// Use global exception middleware
+app.UseMiddleware<Api.Middleware.ExceptionMiddleware>();
 
 // write line database connection string
 
@@ -80,6 +106,9 @@ app.UseSwagger();
 app.UseSwaggerUI();
 
 app.UseHttpsRedirection();
+
+// Use CORS before authorization
+app.UseCors("AllowAll");
 
 app.UseAuthorization();
 

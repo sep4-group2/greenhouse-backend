@@ -15,7 +15,6 @@ public class SimpleMqttClient
     private readonly IMqttClient _client;
     private readonly MqttClientOptions _options;
     private readonly AppDbContext _dbContext;
-    private readonly SensorReadingValidator _validator;
     private readonly SensorService _sensorService;
     private readonly ActionService _actionService;
 
@@ -25,7 +24,6 @@ public class SimpleMqttClient
         var port = int.Parse(configuration["MQTT:Port"] ?? "1883");
         
         _dbContext = dbContext;
-        _validator = new SensorReadingValidator(dbContext);
         _sensorService = sensorService;
         _actionService = actionService;
             
@@ -110,6 +108,7 @@ public class SimpleMqttClient
     
     private async Task HandleMessage(string topic, string message)
     {
+        Console.WriteLine($"Handling message on topic '{topic}': {message}");
         if (topic == "greenhouse/sensor")
         {
             await _sensorService.HandleSensorData(message);
