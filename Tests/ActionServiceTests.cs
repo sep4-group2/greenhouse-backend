@@ -3,6 +3,11 @@ using Data.Entities;
 using Tests.Helpers;
 using Action = Data.Entities.Action;
 using Api.Clients;
+using System;
+using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
+using Xunit;
 
 namespace Tests
 {
@@ -84,6 +89,52 @@ namespace Tests
             Assert.Contains("Irrigation", types);
             Assert.Contains("Ventilation", types);
             Assert.DoesNotContain("Lighting", types);
+        }
+
+        [Fact]
+        public async Task TriggerAction_UserNotFound_ThrowsUnauthorizedAccessException()
+        {
+            var dbContext = TestDbHelper.GetInMemoryDbContext();
+            var testMqttClient = new TestApiMqttClient();
+            var service = new ActionService(dbContext, testMqttClient);
+            await Assert.ThrowsAsync<UnauthorizedAccessException>(
+                () => service.TriggerAction("nouser@example.com", 1, "TestType"));
+        }
+
+        [Fact]
+        public async Task TriggerAction_GreenhouseNotLinked_ThrowsUnauthorizedAccessException()
+        {
+            var dbContext = TestDbHelper.GetInMemoryDbContext();
+            var user = new User { email = "user@example.com", Password = "p" };
+            dbContext.Users.Add(user);
+            await dbContext.SaveChangesAsync();
+            var testMqttClient = new TestApiMqttClient();
+            var service = new ActionService(dbContext, testMqttClient);
+            await Assert.ThrowsAsync<UnauthorizedAccessException>(
+                () => service.TriggerAction(user.email, 999, "TestType"));
+        }
+
+        [Fact]
+        public async Task TriggerAction_Success_ThrowsMqttClientNotConnectedException()
+        {
+            var dbContext = TestDbHelper.GetInMemoryDbContext();
+            var user = new User { email = "user@example.com", Password = "p" };
+            dbContext.Users.Add(user);
+            var greenhouse = new Greenhouse
+            {
+                Name = "GH",
+                MacAddress = "MAC1",
+                LightingMethod = "L",
+                WateringMethod = "W",
+                FertilizationMethod = "F",
+                UserEmail = user.email
+            };
+            dbContext.Greenhouses.Add(greenhouse);
+            await dbContext.SaveChangesAsync();
+            var testMqttClient = new TestApiMqttClient();
+            var service = new ActionService(dbContext, testMqttClient);
+            await Assert.ThrowsAsync<MQTTnet.Exceptions.MqttClientNotConnectedException>(
+                () => service.TriggerAction(user.email, greenhouse.Id, "Irrigation"));
         }
     }
 }
