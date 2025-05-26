@@ -12,11 +12,11 @@ public class Greenhouse
     public string WateringMethod { get; set; }
     public string FertilizationMethod { get; set; }
 
-    [Required]
-    public string UserEmail { get; set; }
+    // Allow nullable UserEmail for unpairing
+    public string? UserEmail { get; set; }
     
     [ForeignKey("UserEmail")]
-    public User User { get; set; }
+    public User? User { get; set; }
 
     public int? ActivePresetId { get; set; }
     [ForeignKey("ActivePresetId")]

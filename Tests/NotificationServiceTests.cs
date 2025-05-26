@@ -21,7 +21,7 @@ public class NotificationServiceTests
         
         // Create configuration and logger for NotificationService
         var configuration = new ConfigurationBuilder()
-            .AddInMemoryCollection(new Dictionary<string, string>())
+            .AddInMemoryCollection(new Dictionary<string, string?>())
             .Build();
         var logger = NullLogger<NotificationService>.Instance;
 
@@ -86,7 +86,7 @@ public class NotificationServiceTests
     }
 
     [Fact]
-    public async Task GetPublicKey_ReturnsNonNullValue()
+    public void GetPublicKey_ReturnsNonNullValue()
     {
         //Arrange
         var dbContext = TestDbHelper.GetInMemoryDbContext();
