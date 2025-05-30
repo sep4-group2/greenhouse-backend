@@ -27,11 +27,12 @@ public class ApiMqttClient
             .WithTcpServer(host, port)
             .WithClientId($"Api_{Guid.NewGuid()}");
         
-        if (configuration["MQTT:Username"] != null && configuration["MQTT:Password"] != null)
-        {
-            builder.WithCredentials(configuration["MQTT:Username"], configuration["MQTT:Password"]);
-        }
-        
+        // if (configuration["MQTT:Username"] != null && configuration["MQTT:Password"] != null)
+        // {
+        //     builder.WithCredentials(configuration["MQTT:Username"], configuration["MQTT:Password"]);
+        // }
+        //
+        Console.WriteLine("Trying to connect to host: " + host + " port: " + port);
         _options = builder
             .WithCleanSession()
             .Build();
