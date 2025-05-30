@@ -16,9 +16,9 @@ public class ApiMqttClient
 
     public ApiMqttClient(IConfiguration configuration)
     {
-        // var host = configuration["MQTT:Host"] ?? "localhost";
+        var host = configuration["MQTT:Host"] ?? "localhost";
         var port = int.Parse(configuration["MQTT:Port"] ?? "1883");
-        var host = "4.208.73.116";
+        // var host = "4.208.73.116";
         
         var factory = new MqttClientFactory();
         _client = factory.CreateMqttClient();
